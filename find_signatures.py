@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from music21 import *
 from music21.note import Note
 from music21.stream import Stream
@@ -12,7 +14,6 @@ score2 = converter.parse('https://kern.humdrum.org/cgi-bin/ksdata?location=users
 # todo фильтровать одинаковые сигнатуры - придумать как группировать одинаковые
 # todo аккорды обработать
 # todo обработать разные части
-# todo оптимизировать алгоритм - начинать считать сразу с конца
 
 # CONTROLLERS REGION start
 
@@ -60,22 +61,21 @@ def find_signatures():
 
     for i in range(0, len(intervals1), min_note_count):
         for k in range(0, len(intervals2), min_note_count):
-            j = i + min_note_count
-            m = k + min_note_count
+            j = i + max_note_count
+            m = k + max_note_count
             signature = []
             notes1 = []
             notes2 = []
-            while j <= i + max_note_count and m <= k + max_note_count:
+            while j > i + min_note_count and m > k + min_note_count:
                 if 0 <= j < len(intervals1) and 0 <= m < len(intervals2):
                     benchmark = SignatureBenchmark(benchmark_percent, threshold, show_logs)
                     notes1 = intervals1[i: j]
                     notes2 = intervals2[k: m]
                     if benchmark.is_signature(notes1, notes2):
                         signature = notes2
-                    j += 1
-                    m += 1
-                else:
-                    break
+                        break
+                j -= 1
+                m -= 1
             if len(signature) > 0:
                 result.append(signature)
                 stream1 = Stream()
@@ -118,5 +118,16 @@ def count_repeated(list):
     return list_with_count
 
 
+start_time = datetime.now()
 signatures = find_signatures()
-print(*count_repeated(signatures), sep='\n')
+end_time = datetime.now()
+print('Time: ', end_time - start_time)
+
+result = count_repeated(signatures)
+stream1 = Stream()
+for element in result:
+    stream1.append(element[0])
+    stream1.append(note.Rest())
+    stream1.append(note.Rest())
+    stream1.show()
+print(*result, sep='\n')
