@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from music21 import *
+from music21.chord import Chord
 from music21.note import Note
 from music21.stream import Stream
 
@@ -12,8 +13,8 @@ score2 = converter.parse('https://kern.humdrum.org/cgi-bin/ksdata?location=users
 # score2.show()
 
 # todo фильтровать одинаковые сигнатуры - придумать как группировать одинаковые
-# todo аккорды обработать
 # todo обработать разные части
+# todo перевести все в до https://stackoverflow.com/questions/37494229/music21-transpose-streams-to-a-given-key
 
 # CONTROLLERS REGION start
 
@@ -78,12 +79,6 @@ def find_signatures():
                 m -= 1
             if len(signature) > 0:
                 result.append(signature)
-                stream1 = Stream()
-                stream1.append(notes1)
-                stream1.show()
-                stream2 = Stream()
-                stream2.append(notes2)
-                stream2.show()
                 print('Found signature with: ', notes1, ' and ', notes2)
     return result
 
@@ -91,15 +86,18 @@ def find_signatures():
 def get_notes(score):
     notes = []
     parts = [p.flat.notesAndRests.stream() for p in score.parts]
+    key = score.analyze('key')
     for note in parts[0]:
-        # for note in part:
         if isinstance(note, Note):
-            # print(note.pitch)
             notes.append(note)
-        # elif isinstance(note, Chord):
-        # TODO handle chords // chord = list(map(lambda x: x.pitch, note.notes))
-        # print('Chord: {}'.format(chord))
-        #  notes.append(chord)
+        elif isinstance(note, Chord):
+            # trying to get leading tone from chord
+            for chord_pitch in note.pitches:
+                if key.chord.pitches.__contains__(chord_pitch):
+                    if show_logs:
+                        print('Got note from chord: ', chord_pitch)
+                    notes.append(chord_pitch)
+                    break
         else:
             print('Unknown type: {}'.format(note))
     return notes
