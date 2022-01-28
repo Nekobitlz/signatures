@@ -14,6 +14,12 @@ score2 = converter.parse('https://kern.humdrum.org/cgi-bin/ksdata?location=users
 
 # todo фильтровать одинаковые сигнатуры - придумать как группировать одинаковые
 # todo обработать разные части
+# todo ритмы
+# todo брать сигнатуры и потом проходить по произведениям смотреть где она там
+# todo оценить в лучшем, худшем и в среднем
+# todo если больше какого-то количества, то уже не сигнатура, если меньше - тоже
+# todo искать в рамках одного произведения
+# todo привести сигнатуру к одному виду
 # todo перевести все в до https://stackoverflow.com/questions/37494229/music21-transpose-streams-to-a-given-key
 
 # CONTROLLERS REGION start
@@ -28,6 +34,8 @@ min_note_count = 4
 max_note_count = 10
 # показывать ли дебажные логи
 show_logs = True
+# искать ритмические сигнатуры
+use_rhythmic = False
 
 min_duration = 0.1
 
@@ -69,7 +77,7 @@ def find_signatures():
             notes2 = []
             while j > i + min_note_count and m > k + min_note_count:
                 if 0 <= j < len(intervals1) and 0 <= m < len(intervals2):
-                    benchmark = SignatureBenchmark(benchmark_percent, threshold, show_logs)
+                    benchmark = SignatureBenchmark(benchmark_percent, threshold, use_rhythmic, show_logs)
                     notes1 = intervals1[i: j]
                     notes2 = intervals2[k: m]
                     if benchmark.is_signature(notes1, notes2):
