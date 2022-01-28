@@ -14,7 +14,6 @@ score2 = converter.parse('https://kern.humdrum.org/cgi-bin/ksdata?location=users
 
 # todo фильтровать одинаковые сигнатуры - придумать как группировать одинаковые
 # todo обработать разные части
-# todo ритмы
 # todo брать сигнатуры и потом проходить по произведениям смотреть где она там
 # todo оценить в лучшем, худшем и в среднем
 # todo если больше какого-то количества, то уже не сигнатура, если меньше - тоже
@@ -25,9 +24,9 @@ score2 = converter.parse('https://kern.humdrum.org/cgi-bin/ksdata?location=users
 # CONTROLLERS REGION start
 
 # допустимый процент несовпадения
-threshold = 20
+threshold = 0
 # контрольный показатель совпадения, при котором тест считается пройденным
-benchmark_percent = 60
+benchmark_percent = 100
 # минимальное количество нот, при котором последовательность считается сигнатурой
 min_note_count = 4
 # максимальное количество нот, при котором последовательность считается сигнатурой
@@ -128,12 +127,15 @@ start_time = datetime.now()
 signatures = find_signatures()
 end_time = datetime.now()
 print('Time: ', end_time - start_time)
+print('Founded signatures len: ', len(signatures))
 
 result = count_repeated(signatures)
+print('Counted signatures len: ', len(result))
 stream1 = Stream()
 for element in result:
     stream1.append(element[0])
     stream1.append(note.Rest())
     stream1.append(note.Rest())
-    stream1.show()
+    stream1.append(note.Rest())
+stream1.show()
 print(*result, sep='\n')

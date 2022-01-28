@@ -1,3 +1,4 @@
+from benchmark.benchmark_utils import *
 from benchmark.direction_benchmark import direction_benchmark
 from benchmark.intervals_benchmark import interval_benchmark
 from benchmark.rhythmic_benchmark import rhythmic_benchmark
@@ -11,11 +12,14 @@ class SignatureBenchmark:
         self.show_logs = show_logs
 
     def is_signature(self, notes1, notes2):
-        intervals_percent = interval_benchmark(notes1, notes2) - self.benchmark_percent
-        direction_percent = direction_benchmark(notes1, notes2) - self.benchmark_percent
+        intervals_percent = interval_benchmark(notes1, notes2)
+        direction_percent = direction_benchmark(notes1, notes2)
         if self.use_rhythmic:
-            rhythmic_percent = rhythmic_benchmark(notes1, notes2) - self.benchmark_percent
+            rhythmic_percent = rhythmic_benchmark(notes1, notes2)
         else:
             rhythmic_percent = 0
-        summary = intervals_percent + direction_percent + rhythmic_percent
-        return summary >= 100 - self.threshold
+        values = [intervals_percent, direction_percent, rhythmic_percent]
+        return serial_matching(values, self.benchmark_percent) \
+               or parallel_matching(values, self.benchmark_percent) \
+               or summational_matching(values, self.benchmark_percent, self.threshold) \
+               or differential_matching(values, self.benchmark_percent, self.threshold)
