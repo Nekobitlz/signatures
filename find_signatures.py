@@ -8,18 +8,38 @@ from music21.stream import Stream
 from benchmark.signature_benchmark import SignatureBenchmark
 
 score1 = converter.parse('http://kern.ccarh.org/cgi-bin/ksdata?l=users/craig/classical/bach/cello&file=bwv1007-01.krn&f=kern')
-score2 = converter.parse('https://kern.humdrum.org/cgi-bin/ksdata?location=users/craig/classical/bach/371chorales&file=chor279.krn&f=kern')
+#score1 = converter.parse('https://kern.humdrum.org/cgi-bin/ksdata?location=users/craig/classical/bach/371chorales&file=chor279.krn&f=kern')
 # score1.show()
 # score2.show()
 
-# todo фильтровать одинаковые сигнатуры - придумать как группировать одинаковые
+# todo методы скользящего окна
+# todo фильтровать одинаковые сигнатуры - придумать как группировать одинаковые, привести сигнатуру к одному виду
 # todo обработать разные части
 # todo брать сигнатуры и потом проходить по произведениям смотреть где она там
 # todo оценить в лучшем, худшем и в среднем
-# todo искать в рамках одного произведения
-# todo привести сигнатуру к одному виду
 
 # CONTROLLERS REGION start
+
+
+
+class Signature:
+
+    def __init__(self, notes1, notes2):
+        self.notes1 = notes1
+        self.notes2 = notes2
+
+    def __str__(self):
+        return self.get_note_str()
+
+    def __repr__(self):
+        return self.get_note_str()
+
+    def __eq__(self, o: object):
+        return self.notes1 == o or self.notes2 == o
+
+    def get_note_str(self):
+        return 'Found signature with: ' + ', '.join(str(n) for n in self.notes1) + ' and ' + ', '.join(str(n) for n in self.notes2)
+
 
 # допустимый процент несовпадения
 threshold = 0
@@ -45,9 +65,8 @@ min_duration = 0.1
 
 
 def find_signatures():
-    counter = 0
     intervals1 = get_notes(transpose_to_c(score1))
-    intervals2 = get_notes(transpose_to_c(score2))
+    intervals2 = get_notes(transpose_to_c(score1))
     result = []
 
     if len(intervals1) < len(intervals2):
@@ -56,7 +75,11 @@ def find_signatures():
         intervals2 = temp_interval
 
     for i in range(0, len(intervals1), max_note_count):
-        for k in range(0, len(intervals2), max_note_count):
+        if i + max_note_count < len(intervals2):
+            search_index = i + max_note_count
+        else:
+            search_index = len(intervals2) - 1
+        for k in range(search_index, len(intervals2), max_note_count):
             j = i + max_note_count
             m = k + max_note_count
             signature = []
@@ -73,8 +96,9 @@ def find_signatures():
                 j -= 1
                 m -= 1
             if len(signature) > 0:
-                result.append(signature)
-                print('Found signature with: ', notes1, ' and ', notes2)
+                result.append(Signature(notes1, notes2))
+                if show_logs:
+                    print('Found signature with: ', notes1, ' and ', notes2)
     return result
 
 
@@ -137,11 +161,17 @@ print('Counted signatures len: ', len(counted_signatures))
 
 filtered_signatures = filter_signatures_by_entries(counted_signatures)
 print('Filtered signatures by entries: ', len(filtered_signatures))
-stream1 = Stream()
-# for element in result:
-#    stream1.append(element[0])
-#   stream1.append(note.Rest())
-#  stream1.append(note.Rest())
-# stream1.append(note.Rest())
-# stream1.show()
+for element in filtered_signatures:
+    stream1 = Stream()
+    stream1.append(element.notes1)
+    stream1.append(note.Rest())
+    stream1.append(note.Rest())
+    stream1.append(note.Rest())
+    stream1.append(element.notes2)
+    stream1.show()
 print(*filtered_signatures, sep='\n')
+
+
+# Founded signatures len:  316
+# Counted signatures len:  61
+# Filtered signatures by entries:  31
