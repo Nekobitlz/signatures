@@ -16,10 +16,8 @@ score2 = converter.parse('https://kern.humdrum.org/cgi-bin/ksdata?location=users
 # todo обработать разные части
 # todo брать сигнатуры и потом проходить по произведениям смотреть где она там
 # todo оценить в лучшем, худшем и в среднем
-# todo если больше какого-то количества, то уже не сигнатура, если меньше - тоже
 # todo искать в рамках одного произведения
 # todo привести сигнатуру к одному виду
-# todo перевести все в до https://stackoverflow.com/questions/37494229/music21-transpose-streams-to-a-given-key
 
 # CONTROLLERS REGION start
 
@@ -31,6 +29,10 @@ benchmark_percent = 100
 min_note_count = 4
 # максимальное количество нот, при котором последовательность считается сигнатурой
 max_note_count = 10
+# минимальное количество раз, которое сигнатура может встречаться в произведении
+min_signature_entries = 4
+# максимальное количество раз, которое сигнатура может встречаться в произведении
+max_signature_entries = 10
 # показывать ли дебажные логи
 show_logs = True
 # искать ритмические сигнатуры
@@ -38,28 +40,14 @@ use_rhythmic = False
 
 min_duration = 0.1
 
+
 # CONTROLLERS REGION end
 
 
-class NoteInterval:
-
-    def __init__(self, notes, interval_between):
-        self.notes = notes
-        self.interval = interval_between
-
-    def __str__(self):
-        return self.get_note_str() + " - " + self.interval.niceName
-
-    def __repr__(self):
-        return self.get_note_str() + " - " + self.interval.niceName
-
-    def get_note_str(self):
-        return ', '.join(str(n) for n in self.notes)
-
-
 def find_signatures():
-    intervals1 = get_notes(score1)
-    intervals2 = get_notes(score2)
+    counter = 0
+    intervals1 = get_notes(transpose_to_c(score1))
+    intervals2 = get_notes(transpose_to_c(score2))
     result = []
 
     if len(intervals1) < len(intervals2):
@@ -67,8 +55,8 @@ def find_signatures():
         intervals1 = intervals2
         intervals2 = temp_interval
 
-    for i in range(0, len(intervals1), min_note_count):
-        for k in range(0, len(intervals2), min_note_count):
+    for i in range(0, len(intervals1), max_note_count):
+        for k in range(0, len(intervals2), max_note_count):
             j = i + max_note_count
             m = k + max_note_count
             signature = []
@@ -123,19 +111,37 @@ def count_repeated(list):
     return list_with_count
 
 
+def filter_signatures_by_entries(list_with_count):
+    result = []
+    for index in range(0, len(list_with_count)):
+        element = list_with_count[index]
+        if min_signature_entries <= element[1] <= max_signature_entries:
+            result.append(element[0])
+    return result
+
+
+def transpose_to_c(score):
+    k = score.analyze('key')
+    i = interval.Interval(k.tonic, pitch.Pitch('C'))
+    return score.transpose(i)
+
+
 start_time = datetime.now()
 signatures = find_signatures()
 end_time = datetime.now()
 print('Time: ', end_time - start_time)
 print('Founded signatures len: ', len(signatures))
 
-result = count_repeated(signatures)
-print('Counted signatures len: ', len(result))
+counted_signatures = count_repeated(signatures)
+print('Counted signatures len: ', len(counted_signatures))
+
+filtered_signatures = filter_signatures_by_entries(counted_signatures)
+print('Filtered signatures by entries: ', len(filtered_signatures))
 stream1 = Stream()
-for element in result:
-    stream1.append(element[0])
-    stream1.append(note.Rest())
-    stream1.append(note.Rest())
-    stream1.append(note.Rest())
-stream1.show()
-print(*result, sep='\n')
+# for element in result:
+#    stream1.append(element[0])
+#   stream1.append(note.Rest())
+#  stream1.append(note.Rest())
+# stream1.append(note.Rest())
+# stream1.show()
+print(*filtered_signatures, sep='\n')
