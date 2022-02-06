@@ -12,11 +12,11 @@ score1 = converter.parse('http://kern.ccarh.org/cgi-bin/ksdata?l=users/craig/cla
 # score1.show()
 # score2.show()
 
-# todo методы скользящего окна
 # todo фильтровать одинаковые сигнатуры - придумать как группировать одинаковые, привести сигнатуру к одному виду
+# сделать через threshold, выбор эталона который будет наиболее похожим на все остальные, возможно > 1
 # todo обработать разные части
 # todo брать сигнатуры и потом проходить по произведениям смотреть где она там
-# todo оценить в лучшем, худшем и в среднем
+# todo отмечать сигнатуры в исходном произведении текстом или фоном
 
 # CONTROLLERS REGION start
 
@@ -65,6 +65,7 @@ min_duration = 0.1
 
 
 def find_signatures():
+    benchmark = SignatureBenchmark(benchmark_percent, threshold, use_rhythmic, show_logs)
     intervals1 = get_notes(transpose_to_c(score1))
     intervals2 = get_notes(transpose_to_c(score1))
     result = []
@@ -74,27 +75,22 @@ def find_signatures():
         intervals1 = intervals2
         intervals2 = temp_interval
 
-    for i in range(0, len(intervals1), max_note_count):
-        if i + max_note_count < len(intervals2):
-            search_index = i + max_note_count
-        else:
-            search_index = len(intervals2) - 1
-        for k in range(search_index, len(intervals2), max_note_count):
-            j = i + max_note_count
-            m = k + max_note_count
+    for i in range(0, len(intervals1)):
+        for k in range(i + min_note_count + 1, len(intervals2)):
+            j = i + min_note_count
+            m = k + min_note_count
             signature = []
             notes1 = []
             notes2 = []
-            while j > i + min_note_count and m > k + min_note_count:
+            while j < i + max_note_count and k + max_note_count > m and j < k:
                 if 0 <= j < len(intervals1) and 0 <= m < len(intervals2):
                     benchmark = SignatureBenchmark(benchmark_percent, threshold, use_rhythmic, show_logs)
                     notes1 = intervals1[i: j]
                     notes2 = intervals2[k: m]
                     if benchmark.is_signature(notes1, notes2):
                         signature = notes2
-                        break
-                j -= 1
-                m -= 1
+                j += 1
+                m += 1
             if len(signature) > 0:
                 result.append(Signature(notes1, notes2))
                 if show_logs:
