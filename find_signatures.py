@@ -10,9 +10,8 @@ from notes_utils import transpose_to_c
 
 # score1 = converter.parse('http://kern.ccarh.org/cgi-bin/ksdata?l=users/craig/classical/bach/cello&file=bwv1007-01.krn&f=kern')
 # score1 = converter.parse('https://kern.humdrum.org/cgi-bin/ksdata?location=users/craig/classical/mozart/piano/sonata&file=sonata15-1.krn&format=kern')
-# score1 = converter.parse('https://kern.humdrum.org/cgi-bin/ksdata?location=users/craig/classical/bach/371chorales&file=chor279.krn&f=kern')
-score1 = converter.parse(
-    'https://kern.humdrum.org/cgi-bin/ksdata?l=users/craig/classical/mozart/piano/sonata&file=sonata10-1.krn&f=kern&o=norep')
+score1 = converter.parse('https://kern.humdrum.org/cgi-bin/ksdata?location=users/craig/classical/bach/371chorales&file=chor279.krn&f=kern')
+#score1 = converter.parse('https://kern.humdrum.org/cgi-bin/ksdata?l=users/craig/classical/mozart/piano/sonata&file=sonata10-1.krn&f=kern&o=norep')
 
 
 # score1 = converter.parse('https://kern.humdrum.org/cgi-bin/ksdata?location=users/craig/classical/chopin/prelude&file=prelude28-06.krn&format=kern')
@@ -172,6 +171,14 @@ class SignaturesFinder:
                 result.append(element[0])
         return result
 
+    def highlight_signatures(self, filtered_signatures):
+        for note in self.score.flat.notes:
+            for signature in filtered_signatures:
+                for signature_note in signature.notes:
+                    if note in signature_note:
+                        note.style.color = 'red'
+        self.score.show()
+
     def run(self):
         start_time = datetime.now()
         signatures = self.__find_signatures()
@@ -184,20 +191,14 @@ class SignaturesFinder:
 
         filtered_signatures = self.__filter_signatures_by_entries(counted_signatures)
         print('Filtered signatures by entries: ', len(filtered_signatures))
-        for element in filtered_signatures:
-            stream1 = Stream()
-            for notes in element.notes:
-                stream1.append(notes)
-                stream1.append(note.Rest())
-                stream1.append(note.Rest())
-                stream1.append(note.Rest())
-            # stream1.show()
+
+        self.highlight_signatures(filtered_signatures)
         result = []
         for signature in filtered_signatures:
             result.append(signature.notes)
         return result
 
-# print(*SignaturesFinder().run(), sep='\n')
+print(*SignaturesFinder().run(), sep='\n')
 
 # K330
 # Time:  0:39:25.342773
