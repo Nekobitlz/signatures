@@ -1,3 +1,4 @@
+from collections import Counter, defaultdict
 from datetime import datetime
 
 from music21 import *
@@ -23,23 +24,32 @@ score1 = converter.parse('https://kern.humdrum.org/cgi-bin/ksdata?location=users
 # todo брать сигнатуры и потом проходить по произведениям смотреть где она там
 # todo отмечать сигнатуры в исходном произведении текстом или фоном
 
-class IndexedNotes:
+class Signature:
 
-    def __init__(self, notes, indexes):
+    def __init__(self, notes, index):
         self.notes = notes
-        self.indexes = indexes
+        self.index = index
 
     def __eq__(self, o: object):
-        if isinstance(o, IndexedNotes):
-            return self.notes == o.notes and self.indexes == o.indexes
+        if isinstance(o, Signature):
+            return self.notes == o.notes and self.index == o.index
         else:
             return super().__eq__(o)
 
+    def __str__(self):
+        return self.get_note_str()
 
-class Signature:
+    def __repr__(self):
+        return self.get_note_str()
 
-    def __init__(self, notes):
-        self.notes = notes
+    def get_note_str(self):
+        return ', '.join(str(n) for n in self.notes) + ' with index [' + self.index + ']'
+
+
+class SignatureEntry:
+
+    def __init__(self, signatures):
+        self.signatures = signatures
 
     def __str__(self):
         return self.get_note_str()
@@ -48,21 +58,24 @@ class Signature:
         return self.get_note_str()
 
     def __eq__(self, o: object):
-        return self.notes == o
+        if isinstance(o, SignatureEntry):
+            return self.signatures[0] == o.signatures[0]
+        else:
+            return super().__eq__(o)
 
     def get_note_str(self):
-        return 'Found signature with: ' + ', '.join(str(n) for n in self.notes)
+        return 'Found signature with: ' + ', '.join(str(n) for n in self.signatures)
 
 
 class SignaturesFinder:
 
     def __init__(self,
                  score=score1,
-                 threshold=20,
-                 benchmark_percent=80,
+                 threshold=30,
+                 benchmark_percent=60,
                  min_note_count=4,
                  max_note_count=10,
-                 min_signature_entries=4,
+                 min_signature_entries=2,
                  max_signature_entries=10,
                  show_logs=True,
                  use_rhythmic=False):
@@ -83,12 +96,12 @@ class SignaturesFinder:
         self.show_logs = show_logs
         # искать ритмические сигнатуры
         self.use_rhythmic = use_rhythmic
+        self.transposed_score = transpose_to_c(self.score)
 
     def __find_signatures(self):
         benchmark = SignatureBenchmark(self.benchmark_percent, self.threshold, self.use_rhythmic, self.show_logs)
-        transposed_score = transpose_to_c(self.score)
-        intervals1 = self.__get_notes(transposed_score)
-        intervals2 = self.__get_notes(transposed_score)
+        intervals1 = self.__get_notes(self.transposed_score)
+        intervals2 = self.__get_notes(self.transposed_score)
         result = []
 
         if len(intervals1) < len(intervals2):
@@ -111,7 +124,7 @@ class SignaturesFinder:
                     j += 1
                     m += 1
                 if has_signature:
-                    signature = Signature([notes1, notes2])
+                    signature = SignatureEntry([Signature(notes1, str(i) + str(j)), Signature(notes2, str(k) + str(m))])
                     result.append(signature)
                     if self.show_logs:
                         print(signature)
@@ -142,25 +155,22 @@ class SignaturesFinder:
                 print('Unknown type: {}'.format(note))
         return notes
 
-    def __count_repeated(self, list):
+    def __count_entries(self, list):
         list_with_count, counted_elements = [], []
         for element in list:
-            repeated = False
+            repeat_count = 0
             for counted_element in counted_elements:
                 has_notes = False
-                for notes in element.notes:
-                    if notes in counted_element.notes:
+                for notes in element.signatures:
+                    if notes in counted_element.signatures:
                         has_notes = True
-                        repeated = True
+                        repeat_count += 1
                     elif has_notes:
-                        counted_element.notes.append(notes)
-            if repeated:
-                for index in range(len(list_with_count)):
-                    if list_with_count[index][0] == element:
-                        list_with_count[index][1] = list_with_count[index][1] + 1
-            else:
+                        counted_element.signatures.append(notes)
+            if repeat_count <= 0:
                 counted_elements = counted_elements + [element]
-                list_with_count = list_with_count + [[element, 1]]
+        for element in counted_elements:
+            list_with_count = list_with_count + [[element, len(element.signatures)]]
         return list_with_count
 
     def __filter_signatures_by_entries(self, list_with_count):
@@ -172,33 +182,38 @@ class SignaturesFinder:
         return result
 
     def highlight_signatures(self, filtered_signatures):
-        for note in self.score.flat.notes:
+        for note in self.transposed_score.flat.notes:
             for signature in filtered_signatures:
-                for signature_note in signature.notes:
-                    if note in signature_note:
+                for signature_note in signature.signatures:
+                    if note in signature_note.notes:
                         note.style.color = 'red'
-        self.score.show()
+
+    # self.score.show()
 
     def run(self):
         start_time = datetime.now()
-        signatures = self.__find_signatures()
+        signature_entries = self.__find_signatures()
         end_time = datetime.now()
         print('Time: ', end_time - start_time)
-        print('Founded signatures len: ', len(signatures))
+        print('Founded signature entries len: ', len(signature_entries))
 
-        counted_signatures = self.__count_repeated(signatures)
-        print('Counted signatures len: ', len(counted_signatures))
+        counted_entries = self.__count_entries(signature_entries)
+        print('Counted entries len: ', *counted_entries)
 
-        filtered_signatures = self.__filter_signatures_by_entries(counted_signatures)
+        filtered_signatures = self.__filter_signatures_by_entries(counted_entries)
         print('Filtered signatures by entries: ', len(filtered_signatures))
 
         self.highlight_signatures(filtered_signatures)
         result = []
-        for signature in filtered_signatures:
-            result.append(signature.notes)
+        for entries in filtered_signatures:
+            unique_notes = []
+            for signature in entries.signatures:
+                if signature.notes not in unique_notes:
+                    unique_notes.append(signature.notes)
+            result.append(unique_notes)
         return result
 
-print(*SignaturesFinder().run(), sep='\n')
+# print(*SignaturesFinder().run(), sep='\n')
 
 # K330
 # Time:  0:39:25.342773
