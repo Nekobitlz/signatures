@@ -77,6 +77,7 @@ class SignaturesFinder:
                  min_signature_entries=2,
                  max_signature_entries=10,
                  show_logs=True,
+                 write_logs_in_file=False,
                  use_rhythmic=False):
         self.score = score
         # допустимый процент несовпадения
@@ -93,14 +94,17 @@ class SignaturesFinder:
         self.max_signature_entries = max_signature_entries
         # показывать ли дебажные логи
         self.show_logs = show_logs
+        self.logs_file = None
+        if write_logs_in_file:
+            self.logs_file = open('logs-' + datetime.now().strftime("%Y-%m-%d-%H-%M-%S"), "w+")
         # искать ритмические сигнатуры
         self.use_rhythmic = use_rhythmic
         self.transposed_score = transpose_to_c(self.score)
 
-    def __find_signatures(self):
+    def __find_signatures__(self):
         benchmark = SignatureBenchmark(self.benchmark_percent, self.threshold, self.use_rhythmic, self.show_logs)
-        intervals1 = self.__get_notes(self.transposed_score)
-        intervals2 = self.__get_notes(self.transposed_score)
+        intervals1 = self.__get_notes__(self.transposed_score)
+        intervals2 = self.__get_notes__(self.transposed_score)
         result = []
 
         if len(intervals1) < len(intervals2):
@@ -123,13 +127,12 @@ class SignaturesFinder:
                     m += 1
                 if signature is not None:
                     result.append(signature)
-                    if self.show_logs:
-                        print(signature)
+                    self.__log__(str(signature))
         return result
 
-    def __get_notes(self, score):
+    def __get_notes__(self, score):
         notes = []
-        parts = self.__pick_notes_from_score(score)
+        parts = self.__pick_notes_from_score__(score)
         for note in parts[0]:
             if isinstance(note, Note):
                 notes.append(note)
@@ -139,7 +142,8 @@ class SignaturesFinder:
                 print('Unknown type: {}'.format(note))
         return notes
 
-    def __pick_notes_from_score(self, score):
+    @staticmethod
+    def __pick_notes_from_score__(score):
         if isinstance(score, Part):
             parts = [score.flat.notes.stream()]
         elif isinstance(score, Measure):
@@ -148,7 +152,8 @@ class SignaturesFinder:
             parts = [p.flat.notes.stream() for p in score.parts]
         return parts
 
-    def __count_entries(self, list):
+    @staticmethod
+    def __count_entries__(list):
         list_with_count, counted_elements = [], []
         for element in list:
             repeat_count = 0
@@ -175,7 +180,7 @@ class SignaturesFinder:
         return result
 
     def highlight_signatures(self, filtered_signatures):
-        notes = self.__pick_notes_from_score(self.transposed_score)[0]
+        notes = self.__pick_notes_from_score__(self.transposed_score)[0]
         for signatureEntry in filtered_signatures:
             color = '#' + ''.join(random.sample('0123456789ABCDEF', 6))
             for signature in signatureEntry.signatures:
@@ -184,17 +189,19 @@ class SignaturesFinder:
         self.transposed_score.show()
 
     def run(self):
+        self.__log__('Started signature search for ' + str(self.score))
         start_time = datetime.now()
-        signature_entries = self.__find_signatures()
+        signature_entries = self.__find_signatures__()
         end_time = datetime.now()
-        print('Time: ', end_time - start_time)
-        print('Founded signature entries len: ', len(signature_entries))
 
-        counted_entries = self.__count_entries(signature_entries)
-        print('Counted entries len: ', len(counted_entries))
+        self.__log__('Time: ' + str(end_time - start_time))
+        self.__log__('Founded signature entries len: ' + str(len(signature_entries)))
+
+        counted_entries = self.__count_entries__(signature_entries)
+        self.__log__('Counted entries len: ' + str(len(counted_entries)))
 
         filtered_signatures = self.__filter_signatures_by_entries(counted_entries)
-        print('Filtered signatures by entries: ', len(filtered_signatures))
+        self.__log__('Filtered signatures by entries: ' + str(len(filtered_signatures)))
 
         self.highlight_signatures(filtered_signatures)
         result = []
@@ -204,18 +211,12 @@ class SignaturesFinder:
                 if signature.notes not in unique_notes:
                     unique_notes.append(signature.notes)
             result.append(unique_notes)
+        if self.logs_file is not None:
+            self.logs_file.close()
         return result
 
-# print(*SignaturesFinder().run(), sep='\n')
-
-# K330-1
-# Time:  0:39:25.342773
-# Founded signatures len:  176454
-# Counted signatures len:  1458
-# Filtered signatures by entries:  249
-
-# K332
-# Time:  0:09:02.194635
-# Founded signatures len:  89788
-# Counted signatures len:  1046
-# Filtered signatures by entries:  382
+    def __log__(self, str):
+        if self.show_logs:
+            print(str)
+        if self.logs_file is not None:
+            self.logs_file.write(str + "\n")
