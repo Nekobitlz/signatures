@@ -31,11 +31,23 @@ def test_simple_signature():
 
 def test_mozart_signature():
     s = converter.parse(
-        'https://kern.humdrum.org/cgi-bin/ksdata?location=users/craig/classical/mozart/piano/sonata&file=sonata10-2.krn&format=kern&o=norep')
+        'https://kern.humdrum.org/cgi-bin/ksdata?location=users/craig/classical/mozart/piano/sonata&file=sonata10-2.krn&format=kern&o=norep'
+    )
     signatures = SignaturesFinder(score=s, threshold=0, benchmark_percent=100,
                                   min_note_count=8, max_note_count=8,
-                                  min_signature_entries=2, max_signature_entries=2, use_rhythmic=True, show_logs=debug).run()
-    expected_result = [*converter.parse("tinyNotation: 3/4 g#4 a8 c'16 bn d'16 c' b a").flat.notes]
+                                  min_signature_entries=6, max_signature_entries=6, use_rhythmic=True, show_logs=debug).run()
+    expected_result = [*converter.parse("tinyNotation: 3/4 d'16 c' b a a4 gn8 c'16. g32").flat.notes]
+    if debug:
+        print('Expected: ', expected_result)
+    assert signatures_contain_expected_result(expected_result, signatures)
+
+    s = converter.parse(
+        'https://kern.humdrum.org/cgi-bin/ksdata?location=users/craig/classical/mozart/piano/sonata&file=sonata03-2.krn&format=kern'
+    )
+    signatures = SignaturesFinder(score=s, threshold=0, benchmark_percent=100,
+                                  min_note_count=6, max_note_count=6,
+                                  min_signature_entries=2, max_signature_entries=1000, use_rhythmic=True, show_logs=debug).run()
+    expected_result = [*converter.parse("tinyNotation: 3/8 d'n32 c' b a g4 f#4").flat.notes]
     if debug:
         print('Expected: ', expected_result)
     assert signatures_contain_expected_result(expected_result, signatures)
@@ -64,6 +76,6 @@ def signatures_contain_expected_result(result, signatures):
             break
     return contains
 
-
-test_simple_signature()
+# test_simple_signature()
 test_mozart_signature()
+#converter.parse("tinyNotation: 3/8 d'n32 c' b a g4 f#4").show()
