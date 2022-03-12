@@ -1,4 +1,4 @@
-from collections import Counter, defaultdict
+import random
 from datetime import datetime
 
 from music21 import *
@@ -12,17 +12,16 @@ from notes_utils import transpose_to_c
 # score1 = converter.parse('http://kern.ccarh.org/cgi-bin/ksdata?l=users/craig/classical/bach/cello&file=bwv1007-01.krn&f=kern')
 # score1 = converter.parse('https://kern.humdrum.org/cgi-bin/ksdata?location=users/craig/classical/mozart/piano/sonata&file=sonata15-1.krn&format=kern')
 score1 = converter.parse('https://kern.humdrum.org/cgi-bin/ksdata?location=users/craig/classical/bach/371chorales&file=chor279.krn&f=kern')
-#score1 = converter.parse('https://kern.humdrum.org/cgi-bin/ksdata?l=users/craig/classical/mozart/piano/sonata&file=sonata10-1.krn&f=kern&o=norep')
 
 
+# score1 = converter.parse('https://kern.humdrum.org/cgi-bin/ksdata?l=users/craig/classical/mozart/piano/sonata&file=sonata10-1.krn&f=kern&o=norep')
 # score1 = converter.parse('https://kern.humdrum.org/cgi-bin/ksdata?location=users/craig/classical/chopin/prelude&file=prelude28-06.krn&format=kern')
 # score1.show()
 
 # todo фильтровать одинаковые сигнатуры - придумать как группировать одинаковые, привести сигнатуру к одному виду
 # сделать через threshold, выбор эталона который будет наиболее похожим на все остальные, возможно > 1
 # todo обработать разные части
-# todo брать сигнатуры и потом проходить по произведениям смотреть где она там
-# todo отмечать сигнатуры в исходном произведении текстом или фоном
+
 
 class Signature:
 
@@ -43,7 +42,7 @@ class Signature:
         return self.get_note_str()
 
     def get_note_str(self):
-        return ', '.join(str(n) for n in self.notes) + ' with index [' + self.index + ']'
+        return ', '.join(str(n) for n in self.notes) + ' with index [' + ', '.join(str(n) for n in self.index) + ']'
 
 
 class SignatureEntry:
@@ -113,18 +112,16 @@ class SignaturesFinder:
             for k in range(i + self.min_note_count, len(intervals2)):
                 j = i + self.min_note_count
                 m = k + self.min_note_count
-                has_signature = False
-                notes1 = []
-                notes2 = []
+                signature = None
                 while j <= i + self.max_note_count and k + self.max_note_count >= m and j <= k:
                     if 0 <= j <= len(intervals1) and 0 <= m <= len(intervals2):
                         notes1 = intervals1[i: j]
                         notes2 = intervals2[k: m]
-                        has_signature = benchmark.is_signature(notes1, notes2)
+                        if benchmark.is_signature(notes1, notes2):
+                            signature = SignatureEntry([Signature(notes1, [i, j]), Signature(notes2, [k, m])])
                     j += 1
                     m += 1
-                if has_signature:
-                    signature = SignatureEntry([Signature(notes1, str(i) + str(j)), Signature(notes2, str(k) + str(m))])
+                if signature is not None:
                     result.append(signature)
                     if self.show_logs:
                         print(signature)
@@ -132,28 +129,24 @@ class SignaturesFinder:
 
     def __get_notes(self, score):
         notes = []
-        if isinstance(score, Part):
-            parts = [score.flat.notesAndRests.stream()]
-        elif isinstance(score, Measure):
-            parts = [score.flat.notesAndRests.stream()]
-        else:
-            parts = [p.flat.notesAndRests.stream() for p in score.parts]
-        key = score.analyze('key')
+        parts = self.__pick_notes_from_score(score)
         for note in parts[0]:
             if isinstance(note, Note):
                 notes.append(note)
             elif isinstance(note, Chord):
-                # trying to get leading tone from chord
-                for chord_pitch in note.pitches:
-                    if key.chord.pitches.__contains__(chord_pitch):
-                        if self.show_logs:
-                            print('Got note from chord: ', chord_pitch)
-                        notes.append(Note(chord_pitch))
-                        break
-
+                notes.append(Note(note.root()))
             else:
                 print('Unknown type: {}'.format(note))
         return notes
+
+    def __pick_notes_from_score(self, score):
+        if isinstance(score, Part):
+            parts = [score.flat.notes.stream()]
+        elif isinstance(score, Measure):
+            parts = [score.flat.notes.stream()]
+        else:
+            parts = [p.flat.notes.stream() for p in score.parts]
+        return parts
 
     def __count_entries(self, list):
         list_with_count, counted_elements = [], []
@@ -161,12 +154,12 @@ class SignaturesFinder:
             repeat_count = 0
             for counted_element in counted_elements:
                 has_notes = False
-                for notes in element.signatures:
-                    if notes in counted_element.signatures:
+                for signature in element.signatures:
+                    if signature in counted_element.signatures:
                         has_notes = True
                         repeat_count += 1
                     elif has_notes:
-                        counted_element.signatures.append(notes)
+                        counted_element.signatures.append(signature)
             if repeat_count <= 0:
                 counted_elements = counted_elements + [element]
         for element in counted_elements:
@@ -182,13 +175,13 @@ class SignaturesFinder:
         return result
 
     def highlight_signatures(self, filtered_signatures):
-        for note in self.transposed_score.flat.notes:
-            for signature in filtered_signatures:
-                for signature_note in signature.signatures:
-                    if note in signature_note.notes:
-                        note.style.color = 'red'
-
-    # self.score.show()
+        notes = self.__pick_notes_from_score(self.transposed_score)[0]
+        for signatureEntry in filtered_signatures:
+            color = '#' + ''.join(random.sample('0123456789ABCDEF', 6))
+            for signature in signatureEntry.signatures:
+                for i in range(signature.index[0], signature.index[1]):
+                    notes[i].style.color = color
+        self.transposed_score.show()
 
     def run(self):
         start_time = datetime.now()
@@ -198,7 +191,7 @@ class SignaturesFinder:
         print('Founded signature entries len: ', len(signature_entries))
 
         counted_entries = self.__count_entries(signature_entries)
-        print('Counted entries len: ', *counted_entries)
+        print('Counted entries len: ', len(counted_entries))
 
         filtered_signatures = self.__filter_signatures_by_entries(counted_entries)
         print('Filtered signatures by entries: ', len(filtered_signatures))
@@ -215,7 +208,7 @@ class SignaturesFinder:
 
 # print(*SignaturesFinder().run(), sep='\n')
 
-# K330
+# K330-1
 # Time:  0:39:25.342773
 # Founded signatures len:  176454
 # Counted signatures len:  1458
