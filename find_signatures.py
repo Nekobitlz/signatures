@@ -7,7 +7,7 @@ from music21.note import Note
 from music21.stream import Stream, Part, Measure
 
 from benchmark.signature_benchmark import SignatureBenchmark
-from notes_utils import transpose_to_c
+from notes_utils import *
 
 # score1 = converter.parse('http://kern.ccarh.org/cgi-bin/ksdata?l=users/craig/classical/bach/cello&file=bwv1007-01.krn&f=kern')
 # score1 = converter.parse('https://kern.humdrum.org/cgi-bin/ksdata?location=users/craig/classical/mozart/piano/sonata&file=sonata15-1.krn&format=kern')
@@ -105,6 +105,7 @@ class SignaturesFinder:
         benchmark = SignatureBenchmark(self.benchmark_percent, self.threshold, self.use_rhythmic, self.show_logs)
         intervals1 = self.__get_notes__(self.transposed_score)
         intervals2 = self.__get_notes__(self.transposed_score)
+        notes_to_signature = {}
         result = []
 
         if len(intervals1) < len(intervals2):
@@ -121,7 +122,13 @@ class SignaturesFinder:
                     if 0 <= j <= len(intervals1) and 0 <= m <= len(intervals2):
                         notes1 = intervals1[i: j]
                         notes2 = intervals2[k: m]
-                        if benchmark.is_signature(notes1, notes2):
+                        key = create_key(notes1, notes2)
+                        if key in notes_to_signature:
+                            is_signature = notes_to_signature[key]
+                        else:
+                            is_signature = benchmark.is_signature(notes1, notes2)
+                            notes_to_signature[key] = is_signature
+                        if is_signature:
                             signature = SignatureEntry([Signature(notes1, [i, j]), Signature(notes2, [k, m])])
                     j += 1
                     m += 1
