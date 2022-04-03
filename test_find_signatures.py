@@ -9,7 +9,7 @@ def test_simple_signature():
     s = converter.parse('tinyNotation: 4/4 C4 D E8 F C4 D E8 F C4 D E8 F')
     signatures = SignaturesFinder(score=s, threshold=0, benchmark_percent=100,
                                   min_note_count=4, max_note_count=4,
-                                  min_signature_entries=3, max_signature_entries=100, show_logs=debug).run()
+                                  min_signature_entries=3, max_signature_entries=100, show_logs=debug, write_logs_in_file=debug).run()
     if debug:
         print(*signatures)
     result = [*converter.parse('tinyNotation: 4/4 C4 D E8 F').flat.notes]
@@ -35,7 +35,8 @@ def test_mozart_signature():
     )
     signatures = SignaturesFinder(score=s, threshold=0, benchmark_percent=100,
                                   min_note_count=8, max_note_count=8,
-                                  min_signature_entries=6, max_signature_entries=6, use_rhythmic=True, show_logs=debug).run()
+                                  min_signature_entries=1, max_signature_entries=6, use_rhythmic=True,
+                                  show_logs=debug, write_logs_in_file=debug).run()
     expected_result = [*converter.parse("tinyNotation: 3/4 d'16 c' b a a4 gn8 c'16. g32").flat.notes]
     if debug:
         print('Expected: ', expected_result)
@@ -46,13 +47,15 @@ def test_mozart_signature():
     )
     signatures = SignaturesFinder(score=s, threshold=0, benchmark_percent=100,
                                   min_note_count=6, max_note_count=6,
-                                  min_signature_entries=2, max_signature_entries=1000, use_rhythmic=True, show_logs=debug).run()
+                                  min_signature_entries=2, max_signature_entries=1000, use_rhythmic=True,
+                                  show_logs=debug, write_logs_in_file=debug).run()
     expected_result = [*converter.parse("tinyNotation: 3/8 d'n32 c' b a g4 f#4").flat.notes]
     if debug:
         print('Expected: ', expected_result)
     assert signatures_contain_expected_result(expected_result, signatures)
 
 
+# todo дописать в работу
 def signatures_contain_expected_result(result, signatures):
     contains = False
     for i in range(0, len(signatures)):
@@ -76,6 +79,5 @@ def signatures_contain_expected_result(result, signatures):
             break
     return contains
 
-# test_simple_signature()
+#test_simple_signature()
 test_mozart_signature()
-#converter.parse("tinyNotation: 3/8 d'n32 c' b a g4 f#4").show()

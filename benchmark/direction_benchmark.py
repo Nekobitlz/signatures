@@ -32,11 +32,4 @@ def get_directions(notes):
 def direction_benchmark(notes1, notes2):
     directions1 = get_directions(notes1)
     directions2 = get_directions(notes2)
-    #print('First directions: ', directions1)
-    #print('Second directions: ', directions2)
     return test_correctness(directions1, directions2)
-
-
-notes1 = [Note('C4'), Note('G4'), Note('D4'), Note('D4'), Note('D5'), Note('D3')]
-notes2 = [Note('C4'), Note('G3'), Note('D4'), Note('D4'), Note('D5'), Note('D3')]
-#print(direction_benchmark(notes1, notes2))

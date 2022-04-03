@@ -3,6 +3,7 @@ from datetime import datetime
 
 from music21 import *
 from music21.chord import Chord
+from music21.interval import Interval
 from music21.note import Note
 from music21.stream import Stream, Part, Measure
 
@@ -85,9 +86,9 @@ class SignaturesFinder:
         # контрольный показатель совпадения, при котором тест считается пройденным
         self.benchmark_percent = benchmark_percent
         # минимальное количество нот, при котором последовательность считается сигнатурой
-        self.min_note_count = min_note_count
+        self.min_note_count = min_note_count - 1
         # максимальное количество нот, при котором последовательность считается сигнатурой
-        self.max_note_count = max_note_count
+        self.max_note_count = max_note_count - 1
         # минимальное количество раз, которое сигнатура может встречаться в произведении
         self.min_signature_entries = min_signature_entries
         # максимальное количество раз, которое сигнатура может встречаться в произведении
@@ -100,23 +101,19 @@ class SignaturesFinder:
         # искать ритмические сигнатуры
         self.use_rhythmic = use_rhythmic
         self.transposed_score = transpose_to_c(self.score)
+        self.transposed_notes = []
 
     def __find_signatures__(self):
         benchmark = SignatureBenchmark(self.benchmark_percent, self.threshold, self.use_rhythmic, self.show_logs)
-        intervals1 = self.__get_notes__(self.transposed_score)
-        intervals2 = self.__get_notes__(self.transposed_score)
+        self.transposed_notes = self.__get_notes__(self.transposed_score)
+        intervals1 = self.__map_notes__(self.transposed_notes)
+        intervals2 = intervals1.copy()
         notes_to_signature = {}
         result = []
-
-        if len(intervals1) < len(intervals2):
-            temp_interval = intervals1
-            intervals1 = intervals2
-            intervals2 = temp_interval
-
         for i in range(0, len(intervals1)):
-            for k in range(i + self.min_note_count, len(intervals2)):
-                j = i + self.min_note_count
-                m = k + self.min_note_count
+            for k in range(i + self.min_note_count - 1, len(intervals2)):
+                j = i + self.min_note_count - 1
+                m = k + self.min_note_count - 1
                 signature = None
                 while j <= i + self.max_note_count and k + self.max_note_count >= m and j <= k:
                     if 0 <= j <= len(intervals1) and 0 <= m <= len(intervals2):
@@ -126,10 +123,10 @@ class SignaturesFinder:
                         if key in notes_to_signature:
                             is_signature = notes_to_signature[key]
                         else:
-                            is_signature = benchmark.is_signature(notes1, notes2)
+                            is_signature = benchmark.is_signature(self.logs_file, notes1, notes2)
                             notes_to_signature[key] = is_signature
                         if is_signature:
-                            signature = SignatureEntry([Signature(notes1, [i, j]), Signature(notes2, [k, m])])
+                            signature = SignatureEntry([Signature(notes1, [i, j + 1]), Signature(notes2, [k, m + 1])])
                     j += 1
                     m += 1
                 if signature is not None:
@@ -158,6 +155,30 @@ class SignaturesFinder:
         else:
             parts = [p.flat.notes.stream() for p in score.parts]
         return parts
+
+    @staticmethod
+    def __map_notes__(notes):
+        digits = []
+        for i in range(0, len(notes) - 1):
+            note1: Note = notes[i]
+            note2: Note = notes[i + 1]
+            interval = Interval(note1, note2).semitones
+            durations = note2.duration.ordinal - note1.duration.ordinal
+            byte_index = i.to_bytes(10, 'big')
+            byte_interval = interval.to_bytes(10, 'big', signed=True)
+            byte_durations = durations.to_bytes(10, 'big', signed=True)
+            digits.append([byte_index, byte_interval, byte_durations])
+        return digits
+
+    def __recover_notes__(self, notes):
+        result = []
+        for i in range(0, len(notes)):
+            note = notes[i]
+            index = int.from_bytes(note[0], 'big')
+            result.append(self.transposed_notes[index])
+            if i == len(notes) - 1:
+                result.append(self.transposed_notes[index + 1])
+        return result
 
     @staticmethod
     def __count_entries__(list):
@@ -210,9 +231,16 @@ class SignaturesFinder:
         filtered_signatures = self.__filter_signatures_by_entries(counted_entries)
         self.__log__('Filtered signatures by entries: ' + str(len(filtered_signatures)))
 
-        self.highlight_signatures(filtered_signatures)
+        recovered_signatures = []
+        for signatureEntry in filtered_signatures:
+            recovered_entry = []
+            for signature in signatureEntry.signatures:
+                recovered_entry.append(Signature(self.__recover_notes__(signature.notes), signature.index))
+            recovered_signatures.append(SignatureEntry(recovered_entry))
+
+        self.highlight_signatures(recovered_signatures)
         result = []
-        for entries in filtered_signatures:
+        for entries in recovered_signatures:
             unique_notes = []
             for signature in entries.signatures:
                 if signature.notes not in unique_notes:

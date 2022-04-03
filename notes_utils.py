@@ -8,7 +8,7 @@ def transpose_to_c(score):
 
 
 def notes_to_str(notes):
-    return ','.join([str(note.pitch) for note in notes])
+    return ','.join([str(note) for note in notes])
 
 
 def create_key(notes1, notes2):
@@ -29,4 +29,4 @@ def create_pair_key(notes1, notes2):
 
 
 def create_note_pair(note1, note2):
-    return str(note1.pitch) + ',' + str(note2.pitch)
+    return str(note1) + ',' + str(note2)
