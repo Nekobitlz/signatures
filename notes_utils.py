@@ -30,3 +30,14 @@ def create_pair_key(notes1, notes2):
 
 def create_note_pair(note1, note2):
     return str(note1) + ',' + str(note2)
+
+
+def to_hash(interval, duration):
+    hash_value = abs(interval) * 10 + duration
+    return hash_value if interval >= 0 else -hash_value
+
+
+def from_hash(value):
+    interval = value / 10
+    duration = value % 10
+    return [interval, duration]
