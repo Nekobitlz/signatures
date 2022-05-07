@@ -119,8 +119,6 @@ class SignaturesFinder:
             current_signature = []
             for el in candidate:
                 current_notes = []
-                if el == 114 or el == 380:
-                    stop = True
                 for i in range(el, el + self.min_note_count + 1):
                     current_notes.append(self.transposed_notes[i])
                 current_signature.append(current_notes)
