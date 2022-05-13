@@ -9,6 +9,7 @@ from music21.stream import Stream, Part, Measure
 
 from benchmark.signature_benchmark import SignatureBenchmark
 from notes_utils import *
+from profile_utils import profile
 
 # score1 = converter.parse('http://kern.ccarh.org/cgi-bin/ksdata?l=users/craig/classical/bach/cello&file=bwv1007-01.krn&f=kern')
 # score1 = converter.parse('https://kern.humdrum.org/cgi-bin/ksdata?location=users/craig/classical/mozart/piano/sonata&file=sonata15-1.krn&format=kern')
@@ -216,6 +217,7 @@ class SignaturesFinder:
                     notes[i].style.color = color
         self.transposed_score.show()
 
+    # @profile
     def run(self):
         self.__log__('Started signature search for ' + str(self.score))
         start_time = datetime.now()

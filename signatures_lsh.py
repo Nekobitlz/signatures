@@ -8,6 +8,7 @@ from music21.stream import Part, Measure
 
 from lsh import LSH
 from notes_utils import transpose_to_c, to_hash
+from profile_utils import profile
 
 # score1 = converter.parse('https://kern.humdrum.org/cgi-bin/ksdata?location=users/craig/classical/bach/371chorales&file=chor279.krn&f=kern')
 score1 = converter.parse('tinyNotation: 4/4 C4 D E8 F C4 D E8 F C4 D E8 F C4 D E8 F')
@@ -97,6 +98,7 @@ class SignaturesFinder:
         print(f"Found {len(d1)} unique shingles, out of {len(notes)} possible.")
         return d1
 
+    # @profile
     def run(self):
         self.transposed_notes = self.__get_notes__(self.transposed_score)
         notes = self.__map_notes__(self.transposed_notes, self.use_rhythmic)
@@ -125,8 +127,6 @@ class SignaturesFinder:
             result.append(current_signature)
 
         return result
-
-        # doc_shingles = [self.getShingles(notes, c) for c in range(self.min_note_count, self.min_note_count)]
 
 
 #SignaturesFinder().run()

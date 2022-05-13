@@ -19,7 +19,8 @@ class SignatureBenchmark:
         else:
             rhythmic_percent = 0
         values = [intervals_percent, direction_percent, rhythmic_percent]
-        logger.write(str(values) + '\n')
+        if logger is not None:
+            logger.write(str(values) + '\n')
         return serial_matching(values, self.benchmark_percent) \
                or parallel_matching(values, self.benchmark_percent) \
                or summational_matching(values, self.benchmark_percent, self.threshold) \
