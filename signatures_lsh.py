@@ -103,18 +103,17 @@ class SignaturesFinder:
         self.transposed_notes = self.__get_notes__(self.transposed_score)
         notes = self.__map_notes__(self.transposed_notes, self.use_rhythmic)
         signatures = self.getShingles(notes, self.min_note_count)
-        print(signatures)
+        if self.show_logs:
+            print('signatures: ' + str(signatures))
 
         lsh = LSH(1)
 
         for signature in signatures:
             lsh.add_hash(signature)
 
-        print(lsh.buckets)
-
-        candidate_pairs = lsh.check_candidates(self.min_signature_entries, self.max_signature_entries)
-        print(len(candidate_pairs))
-        print(list(candidate_pairs))
+        candidate_pairs = lsh.check_candidates(signatures, self.threshold, self.min_signature_entries, self.max_signature_entries)
+        if self.show_logs:
+            print('candidate_pairs: ' + str(sorted(candidate_pairs, key=len, reverse=True)))
 
         result = []
         for candidate in candidate_pairs:

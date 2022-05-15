@@ -1,7 +1,8 @@
 import pstats
 import cProfile
+from datetime import datetime
 
-profiler_output_filename = "signature_profiling_without_lsh_2"
+profiler_output_filename = "signature_lsh_profile_" + datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
 
 def profile(func):
