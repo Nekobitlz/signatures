@@ -1,3 +1,4 @@
+import random
 from datetime import datetime
 
 from music21 import converter
@@ -6,6 +7,7 @@ from music21.interval import Interval
 from music21.note import Note
 from music21.stream import Part, Measure
 
+import statprof
 from lsh import LSH
 from notes_utils import transpose_to_c, to_hash
 from profile_utils import profile
@@ -15,14 +17,16 @@ score1 = converter.parse('tinyNotation: 4/4 C4 D E8 F C4 D E8 F C4 D E8 F C4 D E
 # score1 = converter.parse(
 #    'https://kern.humdrum.org/cgi-bin/ksdata?location=users/craig/classical/mozart/piano/sonata&file=sonata10-2.krn&format=kern&o=norep')
 
+profiling = False
+
 
 class SignaturesFinder:
 
     def __init__(self,
                  score=score1,
-                 threshold=30,
-                 benchmark_percent=60,
-                 min_note_count=4,
+                 threshold=0,
+                 benchmark_percent=100,
+                 min_note_count=6,
                  max_note_count=10,
                  min_signature_entries=4,
                  max_signature_entries=10,
@@ -100,32 +104,36 @@ class SignaturesFinder:
 
     # @profile
     def run(self):
+        if profiling:
+            statprof.start()
         self.transposed_notes = self.__get_notes__(self.transposed_score)
         notes = self.__map_notes__(self.transposed_notes, self.use_rhythmic)
+        original_notes = self.__pick_notes_from_score__(self.transposed_score)[0]
         signatures = self.getShingles(notes, self.min_note_count)
         if self.show_logs:
             print('signatures: ' + str(signatures))
 
-        lsh = LSH(1)
-
-        for signature in signatures:
-            lsh.add_hash(signature)
-
-        candidate_pairs = lsh.check_candidates(signatures, self.threshold, self.min_signature_entries, self.max_signature_entries)
+        lsh = LSH()
+        candidate_pairs = lsh.check_candidates(signatures,
+                                               int(self.min_note_count / 100 * (100 - self.threshold)),
+                                               self.min_signature_entries, self.max_signature_entries)
         if self.show_logs:
             print('candidate_pairs: ' + str(sorted(candidate_pairs, key=len, reverse=True)))
 
         result = []
         for candidate in candidate_pairs:
+            color = '#' + ''.join(random.sample('0123456789ABCDEF', 6))
             current_signature = []
             for el in candidate:
                 current_notes = []
                 for i in range(el, el + self.min_note_count + 1):
+                    original_notes[i].style.color = color
                     current_notes.append(self.transposed_notes[i])
                 current_signature.append(current_notes)
             result.append(current_signature)
-
+        self.transposed_score.show()
+        if profiling:
+            statprof.stop()
+            statprof.display()
         return result
 
-
-#SignaturesFinder().run()
