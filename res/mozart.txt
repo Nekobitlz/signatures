@@ -1,0 +1,6 @@
+https://kern.humdrum.org/cgi-bin/ksdata?location=users/craig/classical/mozart/piano/sonata&file=sonata10-2.krn&format=kern&o=norep
+https://kern.humdrum.org/cgi-bin/ksdata?location=users/craig/classical/mozart/piano/sonata&file=sonata03-2.krn&format=kern
+https://kern.humdrum.org/cgi-bin/ksdata?location=musedata/mozart/quartet&file=k080-01.krn&format=kern
+https://kern.humdrum.org/cgi-bin/ksdata?location=musedata/mozart/quartet&file=k155-01.krn&format=kern
+https://kern.humdrum.org/cgi-bin/ksdata?location=musedata/mozart/quartet&file=k156-01.krn&format=kern
+https://kern.humdrum.org/cgi-bin/ksdata?location=musedata/mozart/quartet&file=k157-01.krn&format=kern
