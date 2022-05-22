@@ -24,12 +24,12 @@ class SignaturesFinder:
 
     def __init__(self,
                  score=score1,
-                 threshold=0,
+                 threshold=20,
                  benchmark_percent=100,
                  min_note_count=6,
                  max_note_count=10,
-                 min_signature_entries=4,
-                 max_signature_entries=10,
+                 min_signature_entries=2,
+                 max_signature_entries=12,
                  show_logs=True,
                  write_logs_in_file=False,
                  use_rhythmic=False):
@@ -131,7 +131,7 @@ class SignaturesFinder:
                     current_notes.append(self.transposed_notes[i])
                 current_signature.append(current_notes)
             result.append(current_signature)
-        self.transposed_score.show()
+        #self.transposed_score.show()
         if profiling:
             statprof.stop()
             statprof.display()

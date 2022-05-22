@@ -10,20 +10,18 @@ from signatures_lsh import SignaturesFinder
 
 class MultiScoreSignatures:
 
-    def __init__(self, path):
+    def __init__(self):
         self.b = 1
         self.buckets = []
         for i in range(self.b):
             self.buckets.append({})
+
+    def run(self, scores):
         signatures = []
         use_rhythmic = False
-        with open(path) as f:
-            scores = f.readlines()
-            for score in scores:
-                note_score = converter.parse(score)
-                sf = SignaturesFinder(note_score)
-                signatures.append(sf.run())
-
+        for score in scores:
+            sf = SignaturesFinder(score)
+            signatures.append(sf.run())
         mapped_signatures = []
         for scope_signatures in signatures:
             mapped_scope_signatures = []
@@ -36,7 +34,6 @@ class MultiScoreSignatures:
                 mapped_scope_signatures.append(mapped_signature)
             mapped_signatures.append(mapped_scope_signatures)
         print(mapped_signatures)
-
         score_index_const = 1000
         for i in range(0, len(mapped_signatures)):
             mapped_scope_signatures = mapped_signatures[i]
@@ -44,10 +41,8 @@ class MultiScoreSignatures:
                 for notes in mapped_scope_signatures[j]:
                     key = i * score_index_const + j
                     self.add_hash(notes, key)
-
         candidates = self.check_candidates()
         print(candidates)
-
         mapped_multi_score_signatures = []
         for entry in candidates:
             current_signatures = []
@@ -60,7 +55,6 @@ class MultiScoreSignatures:
                         real.append(notes)
                 current_signatures.append(real)
             mapped_multi_score_signatures.append(current_signatures)
-        print(mapped_multi_score_signatures)
 
         for score_signatures in mapped_multi_score_signatures:
             stream1 = Stream()
@@ -75,6 +69,7 @@ class MultiScoreSignatures:
                 stream1.append(note.Rest())
                 stream1.append(note.Rest())
             stream1.show()
+        return mapped_multi_score_signatures
 
     def make_subvecs(self, signature):
         l = len(signature)
@@ -103,6 +98,3 @@ class MultiScoreSignatures:
                 if len(hits) > 1:
                     candidates.extend(itertools.combinations(hits, len(hits)))
         return set(candidates)
-
-
-MultiScoreSignatures('res/mozart.txt')
