@@ -53,12 +53,14 @@ class SignaturesFinder:
             self.logs_file = open('logs-' + datetime.now().strftime("%Y-%m-%d-%H-%M-%S"), "w+")
         # искать ритмические сигнатуры
         self.use_rhythmic = use_rhythmic
+        self.return_notes = False
         self.transposed_score = transpose_to_c(self.score)
         self.transposed_notes = []
 
-    def __get_notes__(self, score):
+    @staticmethod
+    def __get_notes__(score):
         notes = []
-        parts = self.__pick_notes_from_score__(score)
+        parts = SignaturesFinder.__pick_notes_from_score__(score)
         for note in parts[0]:
             if isinstance(note, Note):
                 notes.append(note)
@@ -129,7 +131,9 @@ class SignaturesFinder:
                 for i in range(el, el + self.min_note_count + 1):
                     original_notes[i].style.color = color
                     current_notes.append(self.transposed_notes[i])
-                current_signature.append(current_notes)
+                current_notes = current_notes if self.return_notes else signatures[el]
+                if current_notes not in current_signature:
+                    current_signature.append(current_notes)
             result.append(current_signature)
         #self.transposed_score.show()
         if profiling:
