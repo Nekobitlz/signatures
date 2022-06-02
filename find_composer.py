@@ -1,3 +1,4 @@
+import collections
 import json
 
 from music21 import converter
@@ -16,6 +17,30 @@ class ComposerFinder:
         for path in database_paths:
             with open(path) as json_file:
                 expected_signatures.update(json.load(json_file, object_hook=note_decoder))
+        temp = []
+        buckets = {}
+        # expected_signatures = collections.defaultdict(list)
+        score_index_const = 100000
+        for i, el in enumerate(expected_signatures.items()):
+            key, val = el
+            for j, notes in enumerate(val[0]):
+                subvec = ','.join(map(str, notes))
+                composer_index = i * score_index_const + j
+                if subvec not in buckets:
+                    buckets[subvec] = []
+                buckets[subvec].append(composer_index)
+        to_remove = []
+        for el in buckets.items():
+            if len(el[1]) > 1:
+                to_remove.append(el)
+        for scores in to_remove:
+            element = list(map(int, scores[0].split(',')))
+            for indexes in scores[1]:
+                composer_index = int(indexes / score_index_const)
+                tup = list(expected_signatures.items())[composer_index]
+                tup[1][0].remove(element)
+        print('Removed {} duplicates signatures from database'.format(len(to_remove)))
+
         self.transposed_score = transpose_to_c(score)
         self.transposed_notes = SignaturesFinder.__get_notes__(self.transposed_score)
         notes = SignaturesFinder.__map_notes__(self.transposed_notes, False)

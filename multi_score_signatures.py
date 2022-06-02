@@ -1,9 +1,6 @@
-import collections
 import itertools
 
 import numpy as np
-from music21 import converter, note
-from music21.stream import Stream
 
 from signatures_lsh import SignaturesFinder
 
