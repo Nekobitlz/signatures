@@ -6,6 +6,8 @@ from music21 import converter
 from json_utils import note_decoder
 from notes_utils import should_skip
 from signatures_lsh import SignaturesFinder
+
+
 # багнутая - 'https://kern.humdrum.org/cgi-bin/ksdata?location=musedata/mozart/quartet&file=k161-01.krn&format=kern'
 
 
@@ -53,6 +55,11 @@ class ComposerFinder:
         signatures_count = sum(composer_count.values())
         for composer in composer_count:
             print('{}: {} %'.format(composer, composer_count[composer] / signatures_count * 100))
+        composer_to_result = {}
+        for composer in composer_count:
+            composer_to_result[composer] = {'count': composer_count[composer], 'recall': composer_count[composer] / signatures_count * 100}
+        print(composer_to_result)
+        return composer_to_result
 
 
 finder = ComposerFinder(['res/scores/language-models/bach.json',
@@ -61,12 +68,17 @@ finder = ComposerFinder(['res/scores/language-models/bach.json',
                          'res/scores/language-models/mozart.json',
                          'res/scores/language-models/telemann.json'
                          ])
-with open('res/scores/language-models/test_scores') as test_scores:
-    lines = test_scores.readlines()
-    for line in lines:
-        if should_skip(line):
-            continue
-        note_score = converter.parse(line.rstrip())
-        print('\nStarting search in ', line)
-        finder.run(note_score)
+input_path = 'res/scores/language-models/test_scores.json'
+with open(input_path) as test_scores:
+    comp_to_scores = json.load(test_scores)
+    result = {}
+    for values in comp_to_scores.values():
+        for score in values:
+            if should_skip(score):
+                continue
+            note_score = converter.parse(score.rstrip())
+            print('\nStarting search in ', score)
+            result[score] = finder.run(note_score)
+    with open(input_path + "-composer-result.json", "w") as outfile:
+        json.dump(result, outfile)
     print('\nSearch ended')
