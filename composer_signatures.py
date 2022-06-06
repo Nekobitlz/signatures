@@ -5,6 +5,7 @@ from music21 import converter
 
 from json_utils import NoteEncoder, note_decoder
 from multi_score_signatures import MultiScoreSignatures
+from notes_utils import should_skip
 
 
 class ComposerSignatures:
@@ -15,14 +16,15 @@ class ComposerSignatures:
         with open(path) as f:
             lines = f.readlines()
             for line in lines:
-                if line.startswith('#'):
+                if should_skip(line):
                     continue
                 note_score = converter.parse(line.rstrip())
                 if note_score.metadata is not None and note_score.metadata.composer is not None:
                     scores[note_score.metadata.composer].append(note_score)
                 else:
-                    # scores['Bach, Johann Sebastian'].append(note_score)
+                    scores['Unknown'].append(note_score)
                     print('Not found composer in metadata: ', line)
+                print('Parsed ', line)
 
         result = collections.defaultdict(list)
         for composer in scores:
@@ -36,4 +38,4 @@ class ComposerSignatures:
             print(data)
 
 
-ComposerSignatures('res/bach_short')
+ComposerSignatures('res/scores/language-models/handel')

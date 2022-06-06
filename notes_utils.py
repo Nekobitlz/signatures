@@ -41,3 +41,7 @@ def from_hash(value):
     interval = value / 10
     duration = value % 10
     return [interval, duration]
+
+
+def should_skip(line):
+    return line is None or line.startswith('#') or len(line.rstrip()) <= 0

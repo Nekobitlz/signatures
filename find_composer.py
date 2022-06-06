@@ -4,6 +4,7 @@ import json
 from music21 import converter
 
 from json_utils import note_decoder
+from notes_utils import should_skip
 from signatures_lsh import SignaturesFinder
 # багнутая - 'https://kern.humdrum.org/cgi-bin/ksdata?location=musedata/mozart/quartet&file=k161-01.krn&format=kern'
 
@@ -54,13 +55,18 @@ class ComposerFinder:
             print('{}: {} %'.format(composer, composer_count[composer] / signatures_count * 100))
 
 
-finder = ComposerFinder(['res/bach_short.json', 'res/mozart_short.json'])
-path = ''
-with open('res/scores/test_scores') as test_scores:
+finder = ComposerFinder(['res/scores/language-models/bach.json',
+                         'res/scores/language-models/handel.json',
+                         'res/scores/language-models/haydn.json',
+                         'res/scores/language-models/mozart.json',
+                         'res/scores/language-models/telemann.json'
+                         ])
+with open('res/scores/language-models/test_scores') as test_scores:
     lines = test_scores.readlines()
     for line in lines:
-        if line.startswith('#'):
+        if should_skip(line):
             continue
         note_score = converter.parse(line.rstrip())
         print('\nStarting search in ', line)
         finder.run(note_score)
+    print('\nSearch ended')
