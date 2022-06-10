@@ -1,10 +1,8 @@
 {
   "Bach": [
     "res/dataset/bach/Liebster-Gott-wenn-werd-ich-sterben-BWV-8_Liebster-Gott-wenn-werd-ich-sterben-BWV-8_Bach-Johann-Sebastian_file1.mid",
-    "res/dataset/bach/Oratorium-Festo-Ascensionis-Christi-Lobet-Gott-in-seinen-Reichen-BWV-11_Der-Herr-Jesus-hub-seine-Hande-auf-BWV-11_Bach-Johann-Sebastian_file1.mid",
     "res/dataset/bach/Oratorium-Festo-Ascensionis-Christi-Lobet-Gott-in-seinen-Reichen-BWV-11_Lobet-Gott-in-seinen-Reichen-BWV-11_Bach-Johann-Sebastian_file1.mid",
     "res/dataset/bach/Oratorium-Festo-Ascensionis-Christi-Lobet-Gott-in-seinen-Reichen-BWV-11_Nun-lieget-alles-unter-dir-BWV-11_Bach-Johann-Sebastian_file1.mid",
-    "res/dataset/bach/Meine-Seufzer-meine-Tranen-BWV-13_So-sei-nun-Seele-BWV-13_Bach-Johann-Sebastian_file1.mid",
     "res/dataset/bach/bwv1080_04.mid",
     "res/dataset/bach/bwv1080_03.mid",
     "res/dataset/bach/bwv1080_02.mid",
@@ -21,18 +19,14 @@
     "res/dataset/handel/Concerto-Grosso-in-G-Minor-Op.-6-No.-6-HWV-324_Allegro-II-HWV-324_Handel-George-Frideric_file1.mid",
     "res/dataset/handel/Concerto-Grosso-in-F-Major-Op.-6-No.-9-HWV-327_Gigue-HWV-327_Handel-George-Frideric_file1.mid",
     "res/dataset/handel/Concerto-Grosso-in-D-major-Op.-3-No.-6-HWV-317_Vivace-HWV-317_Handel-George-Frideric_file1.mid",
-    "res/dataset/handel/Concerto-Grosso-in-B-flat-major-Op.-3-No.-2-HWV-313_Largo-HWV-313_Handel-George-Frideric_file1.mid",
     "res/dataset/handel/Sonata-a-Flauto-e-Cembalo-in-D-Minor-Op.-1-no.-9-HWV-367a_6.-no-tempo-designation_Handel-George-Frideric_file1.midi",
     "res/dataset/handel/Concerto-Grosso-in-G-major-Op.-3-No.-3-HWV-325_Largo-e-staccato-Allegro-I-HWV-314_Handel-George-Frideric_file1.mid",
     "res/dataset/handel/Sonata-a-Flauto-e-Cembalo-in-D-Minor-Op.-1-no.-9-HWV-367a_7.-A-tempo-di-menuett_Handel-George-Frideric_file1.midi",
     "res/dataset/handel/Concerto-Grosso-in-C-Minor-Op.-6-No.-8-HWV-326_Adagio-HWV-326_Handel-George-Frideric_file1.mid",
-    "res/dataset/handel/Sonata-a-Flauto-e-Cembalo-in-C-Op.-1-No.-7-HWV-365_3.-Larghetto_Handel-George-Frideric_file1.midi",
-    "res/dataset/handel/Concerto-Grosso-in-B-Minor-Op.-6-No.-12-HWV-330_Largo-I-HWV-330_Handel-George-Frideric_file1.mid",
     "res/dataset/handel/Violin-sonata-in-D-Major-Op.-1-No.-13-HWV-371_Affettuoso-HWV-371_Handel-George-Frideric_file1.mid",
     "res/dataset/handel/Concerto-Grosso-in-G-major-Op.-6-No.-1-HWV-319_Adagio-HWV-319_Handel-George-Frideric_file1.mid",
     "res/dataset/handel/Concerto-Grosso-in-D-Minor-Op.-6-No.-10-HWV-328_Allegro-II-HWV-328_Handel-George-Frideric_file1.mid",
-    "res/dataset/handel/Violin-sonata-in-D-Major-Op.-1-No.-13-HWV-371_Allegro-I-HWV-371_Handel-George-Frideric_file1.mid",
-    "res/dataset/handel/Concerto-Grosso-in-B-flat-major-Op.-6-No.-7-HWV-325_Largo-HWV-325_Handel-George-Frideric_file1.mid"
+    "res/dataset/handel/Violin-sonata-in-D-Major-Op.-1-No.-13-HWV-371_Allegro-I-HWV-371_Handel-George-Frideric_file1.mid"
   ],
   "Haydn": [
     "res/dataset/haydn/string_quartet_1_2_(c)edwards.mid",
@@ -54,8 +48,15 @@
   ],
   "Telemann": [
     "res/dataset/telemann/telemann_harmonischer_[ist_widerwaertigkeit]_2.mid",
-    "res/dataset/telemann/telemann_quartet_from_tafelmusik_iii_3.mid",
-    "res/dataset/telemann/telemann_tafelmusik_5.mid"
+    "res/dataset/telemann/telemann_tafelmusik_5.mid",
+    "res/dataset/telemann/telemann_three-four_suite_2_(c)icking-archive.mid",
+    "res/dataset/telemann/telemann_trio_sonata_a-major_3_(c)icking-archive.mid",
+    "res/dataset/telemann/telemann_burlesque_7_(c)icking-archive.mid",
+    "res/dataset/telemann/telemann_burlesque_5_(c)icking-archive.mid",
+    "res/dataset/telemann/telemann_burlesque_3_(c)icking-archive.mid",
+    "res/dataset/telemann/telemann_wassermusik_8_(c)icking-archive.mid",
+    "res/dataset/telemann/telemann_wassermusik_1_(c)icking-archive.mid",
+    "res/dataset/telemann/telemann_quartet_from_tafelmusik_iii_4_(c)icking-archive.mid"
   ],
   "Mozart": [
     "https://kern.humdrum.org/cgi-bin/ksdata?location=musedata/mozart/quartet&file=k080-02.krn&format=kern",

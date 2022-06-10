@@ -30,7 +30,7 @@ class SignaturesFinder:
                  max_note_count=10,
                  min_signature_entries=2,
                  max_signature_entries=12,
-                 show_logs=True,
+                 show_logs=False,
                  write_logs_in_file=False,
                  use_rhythmic=False):
         self.score = score

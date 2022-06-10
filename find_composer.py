@@ -51,34 +51,53 @@ class ComposerFinder:
                     count = count + 1
             if count > 0:
                 composer_count[composer] = count
-        print(composer_count)
         signatures_count = sum(composer_count.values())
         for composer in composer_count:
             print('{}: {} %'.format(composer, composer_count[composer] / signatures_count * 100))
         composer_to_result = {}
         for composer in composer_count:
-            composer_to_result[composer] = {'count': composer_count[composer], 'recall': composer_count[composer] / signatures_count * 100}
+            composer_to_result[composer] = {'count': composer_count[composer],
+                                            'confidence': composer_count[composer] / signatures_count * 100}
         print(composer_to_result)
         return composer_to_result
 
 
-finder = ComposerFinder(['res/scores/language-models/bach.json',
-                         'res/scores/language-models/handel.json',
-                         'res/scores/language-models/haydn.json',
-                         'res/scores/language-models/mozart.json',
-                         'res/scores/language-models/telemann.json'
+def get_composer_with_max(finder_result):
+    max_value = -1
+    max_key = ""
+    for founded_composer in finder_result:
+        value = finder_result[founded_composer]['count']
+        if value > max_value:
+            max_value = value
+            max_key = founded_composer
+    return max_key
+
+
+finder = ComposerFinder(['res/scores/language-models/bach_6_20.json',
+                         'res/scores/language-models/handel_6_20.json',
+                         'res/scores/language-models/haydn_6_20.json',
+                         'res/scores/language-models/mozart_6_20.json',
+                         'res/scores/language-models/telemann_6_20.json'
                          ])
 input_path = 'res/scores/language-models/test_scores.json'
+
 with open(input_path) as test_scores:
     comp_to_scores = json.load(test_scores)
     result = {}
-    for values in comp_to_scores.values():
-        for score in values:
+    for composer in comp_to_scores:
+        correct_results = 0
+        for score in comp_to_scores[composer]:
             if should_skip(score):
                 continue
             note_score = converter.parse(score.rstrip())
             print('\nStarting search in ', score)
-            result[score] = finder.run(note_score)
+            finder_result = finder.run(note_score)
+            if composer == get_composer_with_max(finder_result):
+                correct_results = correct_results + 1
+            result[score] = finder_result
+
+        print('Got {}% for {}'.format(correct_results / len(comp_to_scores[composer]) * 100, composer))
+
     with open(input_path + "-composer-result.json", "w") as outfile:
         json.dump(result, outfile)
     print('\nSearch ended')
