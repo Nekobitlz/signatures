@@ -41,7 +41,10 @@ class ComposerFinder:
         print('Removed {} duplicates signatures from database'.format(len(to_remove)))
 
     def run(self, score):
-        shingles = sum(SignaturesFinder(score).run(), [])
+        shingles = []
+        for i in range(6, 11):
+            shingles.append(sum(SignaturesFinder(score, min_note_count=i).run(), []))
+        shingles = sum(shingles, [])
         composer_count = {}
         for composer in self.database_signatures:
             count = 0

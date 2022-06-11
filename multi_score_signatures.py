@@ -17,10 +17,11 @@ class MultiScoreSignatures:
         signatures = []
         for score in scores:
             print('Trying to find signatures in: {}'.format(scores.index(score)))
-            sf = SignaturesFinder(score)
-            signatures.append(sf.run())
+            for i in range(6, 11):
+                sf = SignaturesFinder(score, min_note_count=i)
+                signatures.append(sf.run())
         print(signatures)
-        score_index_const = 1000
+        score_index_const = 100000
         for i in range(0, len(signatures)):
             mapped_scope_signatures = signatures[i]
             for j in range(0, len(mapped_scope_signatures)):
