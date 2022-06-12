@@ -15,16 +15,18 @@
     "res/dataset/bach/The-Well-Tempered-Clavier-Book-1-Prelude-and-Fugue-No.-13-in-F-sharp-Major-BWV-858_Fugue-BWV-858_Bach-Johann-Sebastian_file1.mid"
   ],
   "Handel": [
-    "res/dataset/handel/Concerto-Grosso-in-B-flat-major-Op.-6-No.-7-HWV-325_Allegro-HWV-325_Handel-George-Frideric_file1.mid",
-    "res/dataset/handel/Concerto-Grosso-in-G-Minor-Op.-6-No.-6-HWV-324_Allegro-II-HWV-324_Handel-George-Frideric_file1.mid",
-    "res/dataset/handel/Concerto-Grosso-in-F-Major-Op.-6-No.-9-HWV-327_Gigue-HWV-327_Handel-George-Frideric_file1.mid",
-    "res/dataset/handel/Concerto-Grosso-in-D-major-Op.-3-No.-6-HWV-317_Vivace-HWV-317_Handel-George-Frideric_file1.mid",
-    "res/dataset/handel/Sonata-a-Flauto-e-Cembalo-in-D-Minor-Op.-1-no.-9-HWV-367a_6.-no-tempo-designation_Handel-George-Frideric_file1.midi",
-    "res/dataset/handel/Concerto-Grosso-in-G-major-Op.-3-No.-3-HWV-325_Largo-e-staccato-Allegro-I-HWV-314_Handel-George-Frideric_file1.mid",
-    "res/dataset/handel/Sonata-a-Flauto-e-Cembalo-in-D-Minor-Op.-1-no.-9-HWV-367a_7.-A-tempo-di-menuett_Handel-George-Frideric_file1.midi",
-    "res/dataset/handel/Violin-sonata-in-D-Major-Op.-1-No.-13-HWV-371_Affettuoso-HWV-371_Handel-George-Frideric_file1.mid",
+    "res/dataset/handel/Sonata-a-Flauto-e-Cembalo-in-g-Op.-1-No.-2-HWV-360_2.-Andante_Handel-George-Frideric_file1.midi",
     "res/dataset/handel/Concerto-Grosso-in-D-Minor-Op.-6-No.-10-HWV-328_Allegro-II-HWV-328_Handel-George-Frideric_file1.mid",
-    "res/dataset/handel/Violin-sonata-in-D-Major-Op.-1-No.-13-HWV-371_Allegro-I-HWV-371_Handel-George-Frideric_file1.mid"
+    "res/dataset/handel/Sonata-a-Flauto-e-Cembalo-in-D-Minor-Op.-1-no.-9-HWV-367a_7.-A-tempo-di-menuett_Handel-George-Frideric_file1.midi",
+    "res/dataset/handel/Concerto-Grosso-in-B-flat-major-Op.-6-No.-7-HWV-325_Andante-HWV-325_Handel-George-Frideric_file1.mid",
+    "res/dataset/handel/Concerto-Grosso-in-D-Minor-Op.-6-No.-10-HWV-328_Allegro-I-HWV-328_Handel-George-Frideric_file1.mid",
+    "res/dataset/handel/Concerto-Grosso-in-D-major-Op.-3-No.-6-HWV-317_Vivace-HWV-317_Handel-George-Frideric_file1.mid",
+    "res/dataset/handel/Concerto-Grosso-in-F-Major-Op.-6-No.-9-HWV-327_Largo-HWV-327_Handel-George-Frideric_file1.mid",
+    "res/dataset/handel/Concerto-Grosso-in-G-major-Op.-6-No.-1-HWV-319_Allegro-III-HWV-319_Handel-George-Frideric_file1.mid",
+    "res/dataset/handel/Concerto-Grosso-in-D-Major-Op.-6-No.-5-HWV-323_Presto-HWV-323_Handel-George-Frideric_file1.mid",
+    "res/dataset/handel/Concerto-Grosso-in-D-Minor-Op.-6-No.-10-HWV-328_Allegro-moderato-HWV-328_Handel-George-Frideric_file1.mid",
+    "res/dataset/handel/Concerto-Grosso-in-A-Major-Op.-6-No.-11-HWV-329_Andante-larghetto-e-staccato-HWV-329_Handel-George-Frideric_file1.mid",
+    "res/dataset/handel/Concerto-Grosso-in-D-Major-Op.-6-No.-5-HWV-323_Minuet-HWV-323_Handel-George-Frideric_file1.mid"
   ],
   "Haydn": [
     "res/dataset/haydn/string_quartet_1_2_(c)edwards.mid",
