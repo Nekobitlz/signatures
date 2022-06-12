@@ -22,9 +22,7 @@
     "res/dataset/handel/Sonata-a-Flauto-e-Cembalo-in-D-Minor-Op.-1-no.-9-HWV-367a_6.-no-tempo-designation_Handel-George-Frideric_file1.midi",
     "res/dataset/handel/Concerto-Grosso-in-G-major-Op.-3-No.-3-HWV-325_Largo-e-staccato-Allegro-I-HWV-314_Handel-George-Frideric_file1.mid",
     "res/dataset/handel/Sonata-a-Flauto-e-Cembalo-in-D-Minor-Op.-1-no.-9-HWV-367a_7.-A-tempo-di-menuett_Handel-George-Frideric_file1.midi",
-    "res/dataset/handel/Concerto-Grosso-in-C-Minor-Op.-6-No.-8-HWV-326_Adagio-HWV-326_Handel-George-Frideric_file1.mid",
     "res/dataset/handel/Violin-sonata-in-D-Major-Op.-1-No.-13-HWV-371_Affettuoso-HWV-371_Handel-George-Frideric_file1.mid",
-    "res/dataset/handel/Concerto-Grosso-in-G-major-Op.-6-No.-1-HWV-319_Adagio-HWV-319_Handel-George-Frideric_file1.mid",
     "res/dataset/handel/Concerto-Grosso-in-D-Minor-Op.-6-No.-10-HWV-328_Allegro-II-HWV-328_Handel-George-Frideric_file1.mid",
     "res/dataset/handel/Violin-sonata-in-D-Major-Op.-1-No.-13-HWV-371_Allegro-I-HWV-371_Handel-George-Frideric_file1.mid"
   ],
@@ -47,16 +45,16 @@
     "res/dataset/haydn/string_quartet_17_2_(c)edwards.mid"
   ],
   "Telemann": [
-    "res/dataset/telemann/telemann_harmonischer_[ist_widerwaertigkeit]_2.mid",
-    "res/dataset/telemann/telemann_tafelmusik_5.mid",
-    "res/dataset/telemann/telemann_three-four_suite_2_(c)icking-archive.mid",
-    "res/dataset/telemann/telemann_trio_sonata_a-major_3_(c)icking-archive.mid",
-    "res/dataset/telemann/telemann_burlesque_7_(c)icking-archive.mid",
-    "res/dataset/telemann/telemann_burlesque_5_(c)icking-archive.mid",
-    "res/dataset/telemann/telemann_burlesque_3_(c)icking-archive.mid",
-    "res/dataset/telemann/telemann_wassermusik_8_(c)icking-archive.mid",
-    "res/dataset/telemann/telemann_wassermusik_1_(c)icking-archive.mid",
-    "res/dataset/telemann/telemann_quartet_from_tafelmusik_iii_4_(c)icking-archive.mid"
+    "res/dataset/telemann/telemann_burlesque_8_(c)icking-archive.mid",
+    "res/dataset/telemann/telemann_wassermusik_10_(c)icking-archive.mid",
+    "res/dataset/telemann/telemann_quartet_from_tafelmusik_iii_1.mid",
+    "res/dataset/telemann/telemann_quartet_from_tafelmusik_iii_1_(c)icking-archive.mid",
+    "res/dataset/telemann/telemann_wassermusik_4_(c)icking-archive.mid",
+    "res/dataset/telemann/telemann_wassermusik_2_(c)icking-archive.mid",
+    "res/dataset/telemann/telemann_tafelmusik_3.mid",
+    "res/dataset/telemann/telemann_quartet_from_tafelmusik_iii_4.mid",
+    "res/dataset/telemann/telemann_wassermusik_5_(c)icking-archive.mid",
+    "res/dataset/telemann/telemann_harmonischer_[ist_widerwaertigkeit]_2.mid"
   ],
   "Mozart": [
     "https://kern.humdrum.org/cgi-bin/ksdata?location=musedata/mozart/quartet&file=k080-02.krn&format=kern",
