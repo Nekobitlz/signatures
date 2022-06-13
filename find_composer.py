@@ -1,7 +1,7 @@
-import collections
 import json
 
 from music21 import converter
+from music21 import environment
 
 from json_utils import note_decoder
 from notes_utils import should_skip
@@ -76,30 +76,45 @@ def get_composer_with_max(finder_result):
     return max_key
 
 
-finder = ComposerFinder(['res/scores/language-models/bach_6_20.json',
-                         'res/scores/language-models/handel_6_20.json',
-                         'res/scores/language-models/haydn_6_20.json',
-                         'res/scores/language-models/mozart_6_20.json',
-                         'res/scores/language-models/telemann_6_20.json'
+e = environment.Environment()
+e['autoDownload'] = 'allow'
+
+finder = ComposerFinder(['res/scores/cortical-algorithms/bach-control-set.json',
+                         'res/scores/cortical-algorithms/beethoven-control-set.json',
+                         'res/scores/cortical-algorithms/chopin-control-set-1.json',
+                         'res/scores/cortical-algorithms/corelli-control-set.json',
+                         'res/scores/cortical-algorithms/haydn-control-set.json',
+                         'res/scores/cortical-algorithms/joplin-control-set-1.json',
+                         'res/scores/cortical-algorithms/mozart-control-set.json',
+                         'res/scores/cortical-algorithms/scarlatti-control-set.json',
+                         'res/scores/cortical-algorithms/vivaldi-control-set-1.json',
                          ])
-input_path = 'res/scores/language-models/test_scores.json'
+input_path = 'res/scores/cortical-algorithms/mozart-control-set-testing-set.json'
 
 with open(input_path) as test_scores:
     comp_to_scores = json.load(test_scores)
     result = {}
+    correct_results = 0
+    score_count = 0
     for composer in comp_to_scores:
-        correct_results = 0
+        current_correct = 0
         for score in comp_to_scores[composer]:
             if should_skip(score):
                 continue
-            note_score = converter.parse(score.rstrip())
-            print('\nStarting search in ', score)
-            finder_result = finder.run(note_score)
-            if composer == get_composer_with_max(finder_result):
-                correct_results = correct_results + 1
-            result[score] = finder_result
-
-        print('Got {}% for {}'.format(correct_results / len(comp_to_scores[composer]) * 100, composer))
+            try:
+                note_score = converter.parse(score.rstrip())
+                print('\nStarting search in ', score)
+                finder_result = finder.run(note_score)
+                found_composer = get_composer_with_max(finder_result)
+                if composer == get_composer_with_max(finder_result):
+                    current_correct = current_correct + 1
+                score_count += 1
+                result[score] = finder_result
+            except Exception as ex:
+                print('Failed parsing for {} due to exception: {}'.format(score, ex))
+        correct_results += current_correct
+        print('Got {}% for {}'.format(current_correct / len(comp_to_scores[composer]) * 100, composer))
+    print('Finally got {}% for all'.format(correct_results / score_count * 100))
 
     with open(input_path + "-composer-result.json", "w") as outfile:
         json.dump(result, outfile)
