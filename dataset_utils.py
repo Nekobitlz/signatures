@@ -1,3 +1,4 @@
+import json
 import random
 
 
@@ -13,7 +14,7 @@ def get_control_set_with_size(input_path, size=20, output_path=None):
             output.write(testing_set)
 
 
-def get_testing_set(input_path, percent_size=20, output_path=None):
+def get_testing_set(input_path, composer, percent_size=20, output_path=None):
     new_input_file = ""
     with open(input_path) as old_input_file:
         lines = old_input_file.readlines()
@@ -25,12 +26,12 @@ def get_testing_set(input_path, percent_size=20, output_path=None):
             else:
                 new_input_file += line
     if output_path is None:
-        output_path = input_path + "-testing-set"
-    with open(input_path, "w") as old_input_file, open(output_path, "w") as output:
-        testing_set = "".join(testing_set)
-        output.write(testing_set)
+        output_path = input_path + "-testing-set.json"
+    with open(input_path, "w") as old_input_file, open(output_path, "w") as outfile:
+        comp_to_scores = {composer: testing_set}
+        json.dump(comp_to_scores, outfile)
         old_input_file.write(new_input_file)
 
 
-get_control_set_with_size('res/dataset/vivaldi/vivaldi', 35)
-get_testing_set('res/dataset/vivaldi/vivaldi-control-set')
+get_control_set_with_size('res/dataset/mozart/mozart', 162)
+get_testing_set('res/scores/cortical-algorithms/mozart-control-set', "Mozart")
