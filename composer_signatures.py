@@ -11,7 +11,7 @@ from notes_utils import should_skip
 
 class ComposerSignatures:
 
-    def __init__(self, path):
+    def __init__(self, path, composer=None):
         self.path = path
         scores = collections.defaultdict(list)
         with open(path) as f:
@@ -21,11 +21,14 @@ class ComposerSignatures:
                     continue
                 try:
                     note_score = converter.parse(line.rstrip())
-                    if note_score.metadata is not None and note_score.metadata.composer is not None:
-                        scores[note_score.metadata.composer].append(note_score)
+                    if composer is not None:
+                        scores[composer].append(note_score)
                     else:
-                        scores['Unknown'].append(note_score)
-                        print('Not found composer in metadata: ', line)
+                        if note_score.metadata is not None and note_score.metadata.composer is not None:
+                            scores[note_score.metadata.composer].append(note_score)
+                        else:
+                            scores['Unknown'].append(note_score)
+                            print('Not found composer in metadata: ', line)
                     print('Parsed ', line)
                 except Exception as ex:
                     print('Failed parsing for {} due to exception: {}'.format(line, ex))
@@ -46,4 +49,4 @@ e = environment.Environment()
 e['autoDownload'] = 'allow'
 
 
-ComposerSignatures('res/scores/cortical-algorithms/mozart-control-set')
+ComposerSignatures('res/scores/n-grams/bach-control-set', 'Bach')

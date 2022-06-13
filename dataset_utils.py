@@ -33,5 +33,8 @@ def get_testing_set(input_path, composer, percent_size=20, output_path=None):
         old_input_file.write(new_input_file)
 
 
-get_control_set_with_size('res/dataset/mozart/mozart', 162)
-get_testing_set('res/scores/cortical-algorithms/mozart-control-set', "Mozart")
+in_path = 'res/dataset/schubert/schubert'
+out_path = "res/scores/n-grams/schubert-control-set"
+composer = "Schubert"
+get_control_set_with_size(in_path, 63, out_path)
+get_testing_set(out_path, composer)

@@ -1,0 +1,13 @@
+{
+  "Mozart": [
+    "https://kern.humdrum.org/cgi-bin/ksdata?location=musedata/mozart/quartet&file=k159-02.krn&format=kern\n",
+    "https://kern.humdrum.org/cgi-bin/ksdata?location=users/craig/classical/mozart/piano/sonata&file=sonata06-3l.krn&format=kern\n",
+    "https://kern.humdrum.org/cgi-bin/ksdata?location=users/craig/classical/mozart/piano/sonata&file=sonata06-3h.krn&format=kern\n",
+    "https://kern.humdrum.org/cgi-bin/ksdata?location=users/craig/classical/mozart/piano/sonata&file=sonata06-3c.krn&format=kern\n",
+    "https://kern.humdrum.org/cgi-bin/ksdata?location=musedata/mozart/quartet&file=k080-04.krn&format=kern\n",
+    "https://kern.humdrum.org/cgi-bin/ksdata?location=users/craig/classical/mozart/piano/sonata&file=sonata15-2.krn&format=kern\n",
+    "https://kern.humdrum.org/cgi-bin/ksdata?location=musedata/mozart/quartet&file=k428-01.krn&format=kern\n",
+    "https://kern.humdrum.org/cgi-bin/ksdata?location=musedata/mozart/quartet&file=k172-04.krn&format=kern\n",
+    "https://kern.humdrum.org/cgi-bin/ksdata?location=musedata/mozart/quartet&file=k158-03.krn&format=kern\n"
+  ]
+}
