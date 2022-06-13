@@ -61,13 +61,14 @@ class SignaturesFinder:
     def __get_notes__(score):
         notes = []
         parts = SignaturesFinder.__pick_notes_from_score__(score)
-        for note in parts[0]:
-            if isinstance(note, Note):
-                notes.append(note)
-            elif isinstance(note, Chord):
-                notes.append(Note(note.root()))
-            else:
-                print('Unknown type: {}'.format(note))
+        if len(parts) > 0:
+            for note in parts[0]:
+                if isinstance(note, Note):
+                    notes.append(note)
+                elif isinstance(note, Chord):
+                    notes.append(Note(note.root()))
+                else:
+                    print('Unknown type: {}'.format(note))
         return notes
 
     @staticmethod
@@ -109,6 +110,9 @@ class SignaturesFinder:
         if profiling:
             statprof.start()
         self.transposed_notes = self.__get_notes__(self.transposed_score)
+        if len(self.transposed_notes) <= 0:
+            print("Empty scores is not supported")
+            return self.transposed_notes
         notes = self.__map_notes__(self.transposed_notes, self.use_rhythmic)
         original_notes = self.__pick_notes_from_score__(self.transposed_score)[0]
         signatures = self.getShingles(notes, self.min_note_count)
