@@ -1,9 +1,12 @@
+import collections
 import json
 from collections import defaultdict
+from datetime import datetime
 
 from music21 import converter
 from music21 import environment
 
+import lsh
 import notes_utils
 from json_utils import note_decoder
 from notes_utils import should_skip
@@ -26,30 +29,43 @@ class ComposerFinder:
         for path in database_paths:
             with open(path) as json_file:
                 self.database_signatures.update(json.load(json_file, object_hook=note_decoder))
-        buckets = {}
-        score_index_const = 100000
+        signatures_count = 0
+        for key in self.database_signatures:
+            val = self.database_signatures[key][0]
+            signatures_count += len(val)
         count = 0
-        for i, el in enumerate(self.database_signatures.items()):
-            key, val = el
-            for j, notes in enumerate(val[0]):
-                subvec = ','.join(map(str, notes))
-                composer_index = i * score_index_const + j
-                if subvec not in buckets:
-                    buckets[subvec] = []
-                buckets[subvec].append(composer_index)
-                count += 1
-        to_remove = []
-        for el in buckets.items():
-            if len(el[1]) > 1:
-                to_remove.append(el)
-
-        for scores in to_remove:
-            element = list(map(int, scores[0].split(',')))
-            for indexes in scores[1]:
-                composer_index = int(indexes / score_index_const)
-                tup = list(self.database_signatures.items())[composer_index]
-                tup[1][0].remove(element)
-        print('Removed {} duplicates signatures from database of {}'.format(len(to_remove), count))
+        to_remove = collections.defaultdict(list)
+        start_time = datetime.now()
+        threshold = 80
+        items = list(self.database_signatures)
+        for i in range(len(items)):
+            val1 = self.database_signatures[items[i]][0]
+            print("Looking for composer {} by index {}".format(items[i], i))
+            for j in range(i + 1, len(items)):
+                print("Testing on composer {} by index {}".format(items[j], j))
+                for c1, notes1 in enumerate(val1):
+                    val2 = self.database_signatures[items[j]][0]
+                    for c2, notes2 in enumerate(val2):
+                        if len(notes2) > len(notes1):
+                            max_notes = notes2
+                            min_notes = notes1
+                        else:
+                            max_notes = notes1
+                            min_notes = notes2
+                        equal_count = int(len(min_notes) / 100 * threshold)
+                        similarity = lsh.LSH().similarity(equal_count, min_notes, max_notes)
+                        if similarity > equal_count:
+                            to_remove[i].append(notes1)
+                            to_remove[j].append(notes2)
+                      #      print("Needed to remove from {} - {} and from {} - {}".format(items[i], notes1, items[j], notes2))
+        print("Time: {}".format(datetime.now() - start_time))
+        for index in to_remove:
+            tup = list(self.database_signatures.items())[index]
+            for notes in to_remove[index]:
+                if notes in tup[1][0]:
+                    tup[1][0].remove(notes)
+                    count += 1
+        print('Removed {} duplicates signatures from database of {}'.format(count, signatures_count))
 
     def run(self, score):
         transposed_score = notes_utils.transpose_to_c(score)
