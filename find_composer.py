@@ -1,4 +1,5 @@
 import collections
+import difflib
 import json
 from collections import defaultdict
 from datetime import datetime
@@ -8,7 +9,7 @@ from music21 import environment
 
 import lsh
 import notes_utils
-from json_utils import note_decoder
+from json_utils import note_decoder, NoteEncoder
 from notes_utils import should_skip
 from signatures_lsh import SignaturesFinder
 
@@ -29,43 +30,6 @@ class ComposerFinder:
         for path in database_paths:
             with open(path) as json_file:
                 self.database_signatures.update(json.load(json_file, object_hook=note_decoder))
-        signatures_count = 0
-        for key in self.database_signatures:
-            val = self.database_signatures[key][0]
-            signatures_count += len(val)
-        count = 0
-        to_remove = collections.defaultdict(list)
-        start_time = datetime.now()
-        threshold = 80
-        items = list(self.database_signatures)
-        for i in range(len(items)):
-            val1 = self.database_signatures[items[i]][0]
-            print("Looking for composer {} by index {}".format(items[i], i))
-            for j in range(i + 1, len(items)):
-                print("Testing on composer {} by index {}".format(items[j], j))
-                for c1, notes1 in enumerate(val1):
-                    val2 = self.database_signatures[items[j]][0]
-                    for c2, notes2 in enumerate(val2):
-                        if len(notes2) > len(notes1):
-                            max_notes = notes2
-                            min_notes = notes1
-                        else:
-                            max_notes = notes1
-                            min_notes = notes2
-                        equal_count = int(len(min_notes) / 100 * threshold)
-                        similarity = lsh.LSH().similarity(equal_count, min_notes, max_notes)
-                        if similarity > equal_count:
-                            to_remove[i].append(notes1)
-                            to_remove[j].append(notes2)
-                      #      print("Needed to remove from {} - {} and from {} - {}".format(items[i], notes1, items[j], notes2))
-        print("Time: {}".format(datetime.now() - start_time))
-        for index in to_remove:
-            tup = list(self.database_signatures.items())[index]
-            for notes in to_remove[index]:
-                if notes in tup[1][0]:
-                    tup[1][0].remove(notes)
-                    count += 1
-        print('Removed {} duplicates signatures from database of {}'.format(count, signatures_count))
 
     def run(self, score):
         transposed_score = notes_utils.transpose_to_c(score)
@@ -96,8 +60,47 @@ class ComposerFinder:
             composer_to_result[composer] = {'count': composer_count[composer],
                                             'confidence': composer_count[composer] / signatures_count * 100}
         print(composer_to_result)
-        # transposed_score.show()
+        transposed_score.show()
         return composer_to_result
+
+
+def remove_duplicates(database_paths):
+    database_signatures = {}
+    for path in database_paths:
+        with open(path) as json_file:
+            database_signatures.update(json.load(json_file, object_hook=note_decoder))
+    signatures_count = 0
+    for key in database_signatures:
+        val = database_signatures[key][0]
+        signatures_count += len(val)
+    count = 0
+    to_remove = collections.defaultdict(list)
+    start_time = datetime.now()
+    threshold = 0.85
+    items = list(database_signatures)
+    for i in range(len(items)):
+        val1 = database_signatures[items[i]][0]
+        print("Looking for composer {} by index {}".format(items[i], i))
+        for j in range(i + 1, len(items)):
+            print("Testing on composer {} by index {}".format(items[j], j))
+            val2 = database_signatures[items[j]][0]
+            for c1, notes1 in enumerate(val1):
+                for c2, notes2 in enumerate(val2):
+                    similarity = difflib.SequenceMatcher(None, notes1, notes2).ratio()
+                    if similarity > threshold:
+                        to_remove[i].append(notes1)
+                        to_remove[j].append(notes2)
+                        # print("Needed to remove from {} - {} and from {} - {} with similarity: {}".format(items[i], notes1, items[j], notes2, similarity))
+    print("Time: {}".format(datetime.now() - start_time))
+    for index in to_remove:
+        tup = list(database_signatures.items())[index]
+        for notes in to_remove[index]:
+            if notes in tup[1][0]:
+                tup[1][0].remove(notes)
+                count += 1
+    print('Removed {} duplicates signatures from database of {}'.format(count, signatures_count))
+    with open("res/dataset/no_repeats_signature_database" + ".json", "w") as outfile:
+        json.dump(database_signatures, outfile, cls=NoteEncoder)
 
 
 def find_index(transposed_notes, shingle):
@@ -129,17 +132,20 @@ def get_composer_with_max(finder_result):
 e = environment.Environment()
 e['autoDownload'] = 'allow'
 
-finder = ComposerFinder([
-    'res/scores/markov-chains/bach-control-set.json',
-    'res/scores/markov-chains/beethoven-control-set.json',
-    'res/scores/language-models/haydn.json',
-    'res/scores/markov-chains/mozart-control-set.json',
-    'res/scores/cortical-algorithms/vivaldi-control-set-1.json',
-    'res/scores/n-grams/schubert-control-set.json',
-    'res/dataset/schumann/schumann.json',
-    'res/dataset/tchaikovsky/tchaikovsky.json',
-    'res/dataset/tchaikovsky/tchaikovsky-2.json'
-])
+remove = True
+if remove:
+    remove_duplicates([
+        'res/scores/markov-chains/bach-control-set.json',
+        'res/scores/markov-chains/beethoven-control-set.json',
+        'res/scores/language-models/haydn.json',
+        'res/scores/markov-chains/mozart-control-set.json',
+        'res/scores/cortical-algorithms/vivaldi-control-set-1.json',
+        'res/scores/n-grams/schubert-control-set.json',
+        'res/dataset/schumann/schumann.json',
+        'res/dataset/tchaikovsky/tchaikovsky.json',
+        'res/dataset/tchaikovsky/tchaikovsky-2.json'
+    ])
+database_path = ['res/dataset/no_repeats_signature_database.json']
 input_path = 'res/dataset/tchaikovsky/child_album.json'
 
 with open(input_path) as test_scores:
@@ -155,7 +161,7 @@ with open(input_path) as test_scores:
             try:
                 note_score = converter.parse(score.rstrip())
                 print('\nStarting search in ', score)
-                finder_result = finder.run(note_score)
+                finder_result = ComposerFinder(database_path).run(note_score)
                 found_composer = get_composer_with_max(finder_result)
                 if composer == get_composer_with_max(finder_result):
                     current_correct = current_correct + 1
