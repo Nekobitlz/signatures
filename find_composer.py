@@ -42,16 +42,24 @@ class ComposerFinder:
             shingles.append(sum(SignaturesFinder(score, min_note_count=i).run(), []))
         shingles = sum(shingles, [])
         composer_count = {}
+        composer_to_signatures = collections.defaultdict(list)
         for composer in self.database_signatures:
-            count = 0
             signatures = self.database_signatures[composer][0]
             for signature in signatures:
                 if signature in shingles:
-                    print('Composer {} has signature: {}'.format(composer, str(signature)))
-                    count = count + 1
-                    index = find_index(mapped_notes, signature)
-                    for note in range(index, index + len(signature)):
-                        original_notes[note].style.color = composer_to_color[composer]
+                    composer_to_signatures[composer].append(signature)
+        for composer in composer_to_signatures:
+            composer_to_signatures[composer] = [composer_to_signatures[composer]]
+        remove_duplicates_from(composer_to_signatures)
+        for composer in composer_to_signatures:
+            count = 0
+            signatures = composer_to_signatures[composer][0]
+            for signature in signatures:
+                print('Composer {} has signature: {}'.format(composer, str(signature)))
+                count = count + 1
+                index = find_index(mapped_notes, signature)
+                for note in range(index, index + len(signature)):
+                    original_notes[note].style.color = composer_to_color[composer]
             if count > 0:
                 composer_count[composer] = count
         signatures_count = sum(composer_count.values())
@@ -69,6 +77,12 @@ def remove_duplicates(database_paths):
     for path in database_paths:
         with open(path) as json_file:
             database_signatures.update(json.load(json_file, object_hook=note_decoder))
+    remove_duplicates_from(database_signatures)
+    with open("res/dataset/no_repeats_signature_database" + ".json", "w") as outfile:
+        json.dump(database_signatures, outfile, cls=NoteEncoder)
+
+
+def remove_duplicates_from(database_signatures):
     signatures_count = 0
     for key in database_signatures:
         val = database_signatures[key][0]
@@ -76,31 +90,29 @@ def remove_duplicates(database_paths):
     count = 0
     to_remove = collections.defaultdict(list)
     start_time = datetime.now()
-    threshold = 0.85
+    threshold = 0.8
     items = list(database_signatures)
     for i in range(len(items)):
         val1 = database_signatures[items[i]][0]
-        print("Looking for composer {} by index {}".format(items[i], i))
+        #print("Looking for composer {} by index {}".format(items[i], i))
         for j in range(i + 1, len(items)):
-            print("Testing on composer {} by index {}".format(items[j], j))
+        #    print("Testing on composer {} by index {}".format(items[j], j))
             val2 = database_signatures[items[j]][0]
             for c1, notes1 in enumerate(val1):
                 for c2, notes2 in enumerate(val2):
                     similarity = difflib.SequenceMatcher(None, notes1, notes2).ratio()
-                    if similarity > threshold:
+                    if similarity >= threshold:
                         to_remove[i].append(notes1)
                         to_remove[j].append(notes2)
                         # print("Needed to remove from {} - {} and from {} - {} with similarity: {}".format(items[i], notes1, items[j], notes2, similarity))
-    print("Time: {}".format(datetime.now() - start_time))
+   # print("Time: {}".format(datetime.now() - start_time))
     for index in to_remove:
         tup = list(database_signatures.items())[index]
         for notes in to_remove[index]:
             if notes in tup[1][0]:
                 tup[1][0].remove(notes)
                 count += 1
-    print('Removed {} duplicates signatures from database of {}'.format(count, signatures_count))
-    with open("res/dataset/no_repeats_signature_database" + ".json", "w") as outfile:
-        json.dump(database_signatures, outfile, cls=NoteEncoder)
+   # print('Removed {} duplicates signatures from database of {}'.format(count, signatures_count))
 
 
 def find_index(transposed_notes, shingle):
@@ -132,7 +144,7 @@ def get_composer_with_max(finder_result):
 e = environment.Environment()
 e['autoDownload'] = 'allow'
 
-remove = True
+remove = False
 if remove:
     remove_duplicates([
         'res/scores/markov-chains/bach-control-set.json',
