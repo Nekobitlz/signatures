@@ -20,7 +20,9 @@ composer_to_color = {'Mozart': '#00FFFF',
                      'Tchaikovsky': '#FF0000',
                      'Vivaldi': '#FFFF00',
                      'Bach': '#800080',
-                     'Schubert': '#FBA0E3'}
+                     'Schubert': '#FBA0E3',
+                     'Chopin': '#FF1493',
+                     'Glinka': '#FF4500'}
 
 
 class ComposerFinder:
@@ -78,7 +80,7 @@ def remove_duplicates(database_paths):
         with open(path) as json_file:
             database_signatures.update(json.load(json_file, object_hook=note_decoder))
     remove_duplicates_from(database_signatures)
-    with open("res/dataset/no_repeats_signature_database" + ".json", "w") as outfile:
+    with open(database_path, "w") as outfile:
         json.dump(database_signatures, outfile, cls=NoteEncoder)
 
 
@@ -144,21 +146,15 @@ def get_composer_with_max(finder_result):
 e = environment.Environment()
 e['autoDownload'] = 'allow'
 
-remove = False
+database_path = 'res/dataset/no_repeats_signature_database-glinka.json'
+remove = True
 if remove:
     remove_duplicates([
-        'res/scores/markov-chains/bach-control-set.json',
-        'res/scores/markov-chains/beethoven-control-set.json',
-        'res/scores/language-models/haydn.json',
-        'res/scores/markov-chains/mozart-control-set.json',
-        'res/scores/cortical-algorithms/vivaldi-control-set-1.json',
-        'res/scores/n-grams/schubert-control-set.json',
-        'res/dataset/schumann/schumann.json',
-        'res/dataset/tchaikovsky/tchaikovsky.json',
-        'res/dataset/tchaikovsky/tchaikovsky-2.json'
+        #'res/dataset/no_repeats_signature_database.json',
+        'res/dataset/chopin/chopin.json',
+        'res/dataset/glinka/glinka.json'
     ])
-database_path = ['res/dataset/no_repeats_signature_database.json']
-input_path = 'res/dataset/tchaikovsky/child_album.json'
+input_path = 'res/dataset/glinka/glinka-testing-set.json'
 
 with open(input_path) as test_scores:
     comp_to_scores = json.load(test_scores)
@@ -173,7 +169,7 @@ with open(input_path) as test_scores:
             try:
                 note_score = converter.parse(score.rstrip())
                 print('\nStarting search in ', score)
-                finder_result = ComposerFinder(database_path).run(note_score)
+                finder_result = ComposerFinder([database_path]).run(note_score)
                 found_composer = get_composer_with_max(finder_result)
                 if composer == get_composer_with_max(finder_result):
                     current_correct = current_correct + 1
